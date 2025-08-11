@@ -1,0 +1,1402 @@
+(* region Source and Characters *)
+SourceCharacter
+    = ? any Unicode code point from U+0000 to U+10FFFF ?;
+
+UnicodeIDStart
+    = ? any Unicode code point with the Unicode property ID_Start ?;
+
+UnicodeIDContinue
+    = ? any Unicode code point with the Unicode property ID_Continue ?;
+
+(* endregion *)
+(* region Whitespace and Line Terminators *)
+WhiteSpace
+    = ? U+0009 ? (* Tab *)
+    | ? U+000B ? (* Vertical Tab *)
+    | ? U+000C ? (* Form Feed *)
+    | ? U+0020 ? (* Space *)
+    | ? U+00A0 ? (* No-break space *)
+    | ? U+FEFF ? (* Byte Order Mark *)
+    | UnicodeSpaceSeparator;
+
+UnicodeSpaceSeparator
+    = ? any Unicode character in general category Zs ?;
+
+LineTerminator
+    = ? U+000A ? (* Line Feed *)
+    | ? U+000D ? (* Carriage Return *)
+    | ? U+2028 ? (* Line Separator *)
+    | ? U+2029 ? (* Paragraph Separator *);
+
+LineTerminatorSequence
+    = ? U+000A ?
+    | ? U+000D ?, ? U+000A ?
+    | ? U+000D ?
+    | ? U+2028 ?
+    | ? U+2029 ?;
+
+(* endregion *)
+(* region Comments *)
+Comment
+    = MultiLineComment
+    | SingleLineComment;
+
+MultiLineComment
+    = "/", [ MultiLineCommentChars ], "/";
+
+MultiLineCommentChars
+    = MultiLineNotAsteriskChar, [ MultiLineCommentChars ]
+    | "*", [ PostAsteriskCommentChars ];
+
+PostAsteriskCommentChars
+    = MultiLineNotForwardSlashOrAsteriskChar, [ MultiLineCommentChars ]
+    | "*", [ PostAsteriskCommentChars ];
+
+MultiLineNotAsteriskChar
+    = SourceCharacter - "*";
+
+MultiLineNotForwardSlashOrAsteriskChar
+    = SourceCharacter - ( "/"
+    | "*" );
+
+SingleLineComment
+    = "//", [ SingleLineCommentChars ];
+
+SingleLineCommentChars
+    = SingleLineCommentChar, [ SingleLineCommentChars ];
+
+SingleLineCommentChar
+    = SourceCharacter - ( LineTerminator );
+
+(* endregion *)
+(* region Tokens and Punctuators *)
+Token
+    = IdentifierName
+    | Punctuator
+    | NumericLiteral
+    | StringLiteral
+    | Template;
+
+Punctuator
+    = "{"
+    | "}"
+    | "("
+    | ")"
+    | "["
+    | "]"
+    | "."
+    | "..."
+    | ";"
+    | ","
+    | "<"
+    | ">"
+    | "<="
+    | ">="
+    | "=="
+    | "!="
+    | "==="
+    | "!=="
+    | "+"
+    | "-"
+    | "%"
+    | "++"
+    | "--"
+    | "<<"
+    | ">>"
+    | ">>>"
+    | "&"
+    | "|"
+    | "^"
+    | "!"
+    | "~"
+    | "&&"
+    | "||"
+    | "??"
+    | "?"
+    | ":"
+    | "="
+    | "+="
+    | "-="
+    | "="
+    | "%="
+    | "<<="
+    | ">>="
+    | ">>>="
+    | "&="
+    | "|="
+    | "^="
+    | "&&="
+    | "||="
+    | "??="
+    | "="
+    | "=>"
+    | "/"
+    | "/=";
+
+DivPunctuator
+    = "/"
+    | "/=";
+
+RightBracePunctuator
+    = "}";
+
+(* endregion *)
+(* region Literals *)
+(* region Null Literal *)
+NullLiteral
+    = "null";
+
+(* endregion *)
+(* region Boolean Region *)
+BooleanLiteral
+    = "true"
+    | "false";
+
+(* endregion *)
+(* region Numeric Literals *)
+NumericLiteral
+    = DecimalLiteral
+    | BinaryIntegerLiteral
+    | OctalIntegerLiteral
+    | HexIntegerLiteral
+    | BigIntLiteral;
+
+DecimalLiteral
+    = DecimalIntegerLiteral, ".", [ DecimalDigits ], [ ExponentPart ]
+    | ".", DecimalDigits, [ ExponentPart ]
+    | DecimalIntegerLiteral, [ ExponentPart ];
+
+DecimalIntegerLiteral
+    = "0"
+    | NonZeroDigit, [ DecimalDigits ];
+
+DecimalDigits
+    = { DecimalDigit } - ;
+
+DecimalDigit
+    = "0"
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9";
+
+NonZeroDigit
+    = "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9";
+
+ExponentPart
+    = ExponentIndicator, SignedInteger;
+
+ExponentIndicator
+    = "e"
+    | "E";
+
+SignedInteger
+    = DecimalDigits
+    | "+", DecimalDigits
+    | "-", DecimalDigits;
+
+BinaryIntegerLiteral
+    = "0", ( "b"
+    | "B" ), BinaryDigits;
+
+BinaryDigits
+    = { BinaryDigit } - ;
+
+BinaryDigit
+    = "0"
+    | "1";
+
+OctalIntegerLiteral
+    = "0", ( "o"
+    | "O" ), OctalDigits;
+
+OctalDigits
+    = { OctalDigit } - ;
+
+OctalDigit
+    = "0"
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7";
+
+HexIntegerLiteral
+    = "0", ( "x"
+    | "X" ), HexDigits;
+
+HexDigits
+    = { HexDigit } - ;
+
+HexDigit
+    = DecimalDigit
+    | "a"
+    | "b"
+    | "c"
+    | "d"
+    | "e"
+    | "f"
+    | "A"
+    | "B"
+    | "C"
+    | "D"
+    | "E"
+    | "F";
+
+BigIntLiteral
+    = DecimalBigIntegerLiteral
+    | BinaryBigIntegerLiteral
+    | OctalBigIntegerLiteral
+    | HexBigIntegerLiteral;
+
+DecimalBigIntegerLiteral
+    = DecimalIntegerLiteral, "n";
+
+BinaryBigIntegerLiteral
+    = BinaryIntegerLiteral, "n";
+
+OctalBigIntegerLiteral
+    = OctalIntegerLiteral, "n";
+
+HexBigIntegerLiteral
+    = HexIntegerLiteral, "n";
+
+(* endregion *)
+(* region String Literals *)
+StringLiteral
+    = '"', [ DoubleStringCharacters ], '"'
+    | "'", [ SingleStringCharacters ], "'";
+
+DoubleStringCharacters
+    = { DoubleStringCharacter } - ;
+
+SingleStringCharacters
+    = { SingleStringCharacter } - ;
+
+DoubleStringCharacter
+    = SourceCharacter - ( '"'
+    | 
+    | LineTerminator )
+    | , EscapeSequence
+    | LineContinuation;
+
+SingleStringCharacter
+    = SourceCharacter - ( "'"
+    | 
+    | LineTerminator )
+    | , EscapeSequence
+    | LineContinuation;
+
+LineContinuation
+    = , LineTerminatorSequence;
+
+EscapeSequence
+    = CharacterEscapeSequence
+    | "0"
+    | HexEscapeSequence
+    | UnicodeEscapeSequence;
+
+CharacterEscapeSequence
+    = SingleEscapeCharacter
+    | NonEscapeCharacter;
+
+SingleEscapeCharacter
+    = "'"
+    | '"'
+    | 
+    | "b"
+    | "f"
+    | "n"
+    | "r"
+    | "t"
+    | "v";
+
+NonEscapeCharacter
+    = SourceCharacter - ( EscapeCharacter
+    | LineTerminator );
+
+EscapeCharacter
+    = SingleEscapeCharacter
+    | DecimalDigit
+    | "x"
+    | "u";
+
+HexEscapeSequence
+    = "x", HexDigit, HexDigit;
+
+UnicodeEscapeSequence
+    = "u", HexDigit, HexDigit, HexDigit, HexDigit
+    | "u{", CodePoint, "}";
+
+CodePoint
+    = HexDigits;
+
+(* endregion *)
+(* region Regular Expression Literals *)
+RegularExpressionLiteral
+    = "/", RegularExpressionBody, "/", [ RegularExpressionFlags ];
+
+RegularExpressionBody
+    = RegularExpressionFirstChar, [ RegularExpressionChars ];
+
+RegularExpressionChars
+    = { RegularExpressionChar } - ;
+
+RegularExpressionFirstChar
+    = RegularExpressionNonTerminator - ( "*"
+    | 
+    | "/"
+    | "[" )
+    | RegularExpressionBackslashSequence
+    | RegularExpressionClass;
+
+RegularExpressionChar
+    = RegularExpressionNonTerminator - ( 
+    | "/"
+    | "[" )
+    | RegularExpressionBackslashSequence
+    | RegularExpressionClass;
+
+RegularExpressionBackslashSequence
+    = , RegularExpressionNonTerminator;
+
+RegularExpressionNonTerminator
+    = SourceCharacter - ( LineTerminator );
+
+RegularExpressionClass
+    = "[", [ RegularExpressionClassChars ], "]";
+
+RegularExpressionClassChars
+    = { RegularExpressionClassChar } - ;
+
+RegularExpressionClassChar
+    = RegularExpressionNonTerminator - ( "]"
+    |  )
+    | RegularExpressionBackslashSequence;
+
+RegularExpressionFlags
+    = { RegularExpressionFlag } - ;
+
+RegularExpressionFlag
+    = UnicodeIDContinue;
+
+(* endregion *)
+(* region Template Literals *)
+Template
+    = NoSubstitutionTemplate
+    | SubstitutionTemplate;
+
+NoSubstitutionTemplate
+    = , [ TemplateCharacters ], ;
+
+SubstitutionTemplate
+    = TemplateHead, Expression, TemplateSpans;
+
+TemplateSpans
+    = TemplateTail
+    | TemplateMiddleList, TemplateTail;
+
+TemplateMiddleList
+    = TemplateMiddle, Expression
+    | TemplateMiddleList, TemplateMiddle, Expression;
+
+TemplateHead
+    = "`", [ TemplateCharacters ], "${";
+
+TemplateMiddle
+    = "}", [ TemplateCharacters ], "${";
+
+TemplateTail
+    = "}", [ TemplateCharacters ], "`";
+
+TemplateCharacters
+    = { TemplateCharacter } - ;
+
+TemplateCharacter
+    = SourceCharacter - ( "`"
+    | 
+    | "$"
+    | LineTerminator )
+    | "$"
+    | , EscapeSequence
+    | , NotEscapeSequence
+    | LineContinuation
+    | LineTerminatorSequence;
+
+NotEscapeSequence
+    = "0", DecimalDigit
+    | DecimalDigit - "0"
+    | "x"
+    | "x", HexDigit
+    | "u";
+
+(* endregion *)
+(* endregion *)
+(* region Identifiers *)
+IdentifierName
+    = IdentifierStart
+    | IdentifierName, IdentifierPart;
+
+IdentifierStart
+    = UnicodeIDStart
+    | "$"
+    | "_"
+    | , UnicodeEscapeSequence;
+
+IdentifierPart
+    = UnicodeIDContinue
+    | "$"
+    | "_"
+    | , UnicodeEscapeSequence
+    | ? U+200C ?
+    | ? U+200D ?;
+
+ReservedWord
+    = Keyword
+    | FutureReservedWord
+    | NullLiteral
+    | BooleanLiteral;
+
+Keyword
+    = "await"
+    | "break"
+    | "case"
+    | "catch"
+    | "class"
+    | "const"
+    | "continue"
+    | "debugger"
+    | "default"
+    | "delete"
+    | "do"
+    | "else"
+    | "enum"
+    | "export"
+    | "extends"
+    | "false"
+    | "finally"
+    | "for"
+    | "function"
+    | "if"
+    | "import"
+    | "in"
+    | "instanceof"
+    | "new"
+    | "null"
+    | "return"
+    | "super"
+    | "switch"
+    | "this"
+    | "throw"
+    | "true"
+    | "try"
+    | "typeof"
+    | "var"
+    | "void"
+    | "while"
+    | "with"
+    | "yield";
+
+FutureReservedWord
+    = "enum"
+    | "implements"
+    | "interface"
+    | "let"
+    | "package"
+    | "private"
+    | "protected"
+    | "public"
+    | "static";
+
+(* endregion *)
+(* ================================================ )
+( === SYNTACTIC GRAMMAR === )
+( ================================================ *)
+(* region Expression *)
+(* region Identifiers and References *)
+Identifier
+    = IdentifierName - ( ReservedWord );
+
+IdentifierReference
+    = Identifier
+    | "yield"
+    | "await";
+
+BindingIdentifier
+    = Identifier
+    | "yield"
+    | "await";
+
+LabelIdentifier
+    = Identifier
+    | "yield"
+    | "await";
+
+PrivateIdentifier
+    = "#", IdentifierName;
+
+(* endregion *)
+(* region Literals *)
+Literal
+    = NullLiteral
+    | BooleanLiteral
+    | NumericLiteral
+    | StringLiteral
+    | RegularExpressionLiteral
+    | TemplateLiteral;
+
+TemplateLiteral
+    = NoSubstitutionTemplate
+    | SubstitutionTemplate;
+
+(* endregion *)
+(* region Primary Expressions *)
+PrimaryExpression
+    = "this"
+    | IdentifierReference
+    | Literal
+    | ArrayLiteral
+    | ObjectLiteral
+    | FunctionExpression
+    | ClassExpression
+    | GeneratorExpression
+    | AsyncFunctionExpression
+    | AsyncGeneratorExpression
+    | RegularExpressionLiteral
+    | TemplateLiteral
+    | CoverParenthesizedExpressionAndArrowParameterList;
+
+CoverParenthesizedExpressionAndArrowParameterList
+    = "(", [ Expression ], ")"
+    | "(", Expression, ",", AssignmentExpression, ")"
+    | "(", "...", BindingIdentifier, ")";
+
+(* endregion *)
+(* region Array and Object Literals *)
+ArrayLiteral
+    = "[", [ Elision ], "]"
+    | "[", ElementList, "]"
+    | "[", ElementList, ",", [ Elision ], "]";
+
+ElementList
+    = [ Elision ], AssignmentExpression
+    | [ Elision ], SpreadElement
+    | ElementList, ",", [ Elision ], AssignmentExpression
+    | ElementList, ",", [ Elision ], SpreadElement;
+
+Elision
+    = ","
+    | Elision, ",";
+
+SpreadElement
+    = "...", AssignmentExpression;
+
+ObjectLiteral
+    = "{", "}"
+    | "{", PropertyDefinitionList, "}"
+    | "{", PropertyDefinitionList, ",", "}";
+
+PropertyDefinitionList
+    = PropertyDefinition
+    | PropertyDefinitionList, ",", PropertyDefinition;
+
+PropertyDefinition
+    = IdentifierReference
+    | CoverInitializedName
+    | PropertyName, ":", AssignmentExpression
+    | MethodDefinition
+    | "...", AssignmentExpression;
+
+PropertyName
+    = LiteralPropertyName
+    | ComputedPropertyName;
+
+LiteralPropertyName
+    = IdentifierName
+    | StringLiteral
+    | NumericLiteral;
+
+ComputedPropertyName
+    = "[", AssignmentExpression, "]";
+
+CoverInitializedName
+    = IdentifierReference, Initializer;
+
+Initializer
+    = "=", AssignmentExpression;
+
+(* endregion *)
+(* region Member and Call Expressions *)
+MemberExpression
+    = PrimaryExpression
+    | MemberExpression, "[", Expression, "]"
+    | MemberExpression, ".", IdentifierName
+    | MemberExpression, TemplateLiteral
+    | SuperProperty
+    | MetaProperty
+    | "new", MemberExpression, Arguments;
+
+SuperProperty
+    = "super", "[", Expression, "]"
+    | "super", ".", IdentifierName;
+
+MetaProperty
+    = NewTarget
+    | ImportMeta;
+
+NewTarget
+    = "new", ".", "target";
+
+ImportMeta
+    = "import", ".", "meta";
+
+NewExpression
+    = MemberExpression
+    | "new", NewExpression;
+
+CallExpression
+    = CoverCallExpressionAndAsyncArrowHead
+    | SuperCall
+    | ImportCall
+    | CallExpression, Arguments
+    | CallExpression, "[", Expression, "]"
+    | CallExpression, ".", IdentifierName
+    | CallExpression, TemplateLiteral
+    | CallExpression, ".", PrivateIdentifier;
+
+CoverCallExpressionAndAsyncArrowHead
+    = MemberExpression, Arguments;
+
+SuperCall
+    = "super", Arguments;
+
+ImportCall
+    = "import", "(", AssignmentExpression, ")";
+
+Arguments
+    = "(", ")"
+    | "(", ArgumentList, ")"
+    | "(", ArgumentList, ",", ")";
+
+ArgumentList
+    = AssignmentExpression
+    | "...", AssignmentExpression
+    | ArgumentList, ",", AssignmentExpression
+    | ArgumentList, ",", "...", AssignmentExpression;
+
+OptionalExpression
+    = MemberExpression, OptionalChain
+    | CallExpression, OptionalChain
+    | OptionalExpression, OptionalChain;
+
+OptionalChain
+    = "?.", Arguments
+    | "?.", "[", Expression, "]"
+    | "?.", IdentifierName
+    | OptionalChain, Arguments
+    | OptionalChain, "[", Expression, "]"
+    | OptionalChain, ".", IdentifierName;
+
+LeftHandSideExpression
+    = NewExpression
+    | CallExpression
+    | OptionalExpression;
+
+(* endregion *)
+(* region Unary and Update Expressions *)
+UpdateExpression
+    = LeftHandSideExpression
+    | LeftHandSideExpression, "++"
+    | LeftHandSideExpression, "--"
+    | "++", UnaryExpression
+    | "--", UnaryExpression;
+
+UnaryExpression
+    = UpdateExpression
+    | "delete", UnaryExpression
+    | "void", UnaryExpression
+    | "typeof", UnaryExpression
+    | "+", UnaryExpression
+    | "-", UnaryExpression
+    | "~", UnaryExpression
+    | "!", UnaryExpression
+    | AwaitExpression;
+
+AwaitExpression
+    = "await", UnaryExpression;
+
+(* endregion *)
+(* region Binary Expressions *)
+ExponentiationExpression
+    = UnaryExpression
+    | UpdateExpression, "**", ExponentiationExpression;
+
+MultiplicativeExpression
+    = ExponentiationExpression
+    | MultiplicativeExpression, MultiplicativeOperator, ExponentiationExpression;
+
+MultiplicativeOperator
+    = "*"
+    | "/"
+    | "%";
+
+AdditiveExpression
+    = MultiplicativeExpression
+    | AdditiveExpression, "+", MultiplicativeExpression
+    | AdditiveExpression, "-", MultiplicativeExpression;
+
+ShiftExpression
+    = AdditiveExpression
+    | ShiftExpression, "<<", AdditiveExpression
+    | ShiftExpression, ">>", AdditiveExpression
+    | ShiftExpression, ">>>", AdditiveExpression;
+
+RelationalExpression
+    = ShiftExpression
+    | RelationalExpression, "<", ShiftExpression
+    | RelationalExpression, ">", ShiftExpression
+    | RelationalExpression, "<=", ShiftExpression
+    | RelationalExpression, ">=", ShiftExpression
+    | RelationalExpression, "instanceof", ShiftExpression
+    | RelationalExpression, "in", ShiftExpression
+    | PrivateIdentifier, "in", ShiftExpression;
+
+EqualityExpression
+    = RelationalExpression
+    | EqualityExpression, "==", RelationalExpression
+    | EqualityExpression, "!=", RelationalExpression
+    | EqualityExpression, "===", RelationalExpression
+    | EqualityExpression, "!==", RelationalExpression;
+
+BitwiseANDExpression
+    = EqualityExpression
+    | BitwiseANDExpression, "&", EqualityExpression;
+
+BitwiseXORExpression
+    = BitwiseANDExpression
+    | BitwiseXORExpression, "^", BitwiseANDExpression;
+
+BitwiseORExpression
+    = BitwiseXORExpression
+    | BitwiseORExpression, "|", BitwiseXORExpression;
+
+(* endregion *)
+(* region Logical Expressions *)
+LogicalANDExpression
+    = BitwiseORExpression
+    | LogicalANDExpression, "&&", BitwiseORExpression;
+
+LogicalORExpression
+    = LogicalANDExpression
+    | LogicalORExpression, "||", LogicalANDExpression;
+
+CoalesceExpression
+    = CoalesceExpressionHead, "??", BitwiseORExpression;
+
+CoalesceExpressionHead
+    = CoalesceExpression
+    | BitwiseORExpression;
+
+ShortCircuitExpression
+    = LogicalORExpression
+    | CoalesceExpression;
+
+(* endregion *)
+(* region Conditional Expression *)
+ConditionalExpression
+    = ShortCircuitExpression
+    | ShortCircuitExpression, "?", AssignmentExpression, ":", AssignmentExpression;
+
+(* endregion *)
+(* region Assignment Expressions *)
+AssignmentExpression
+    = ConditionalExpression
+    | ArrowFunction
+    | AsyncArrowFunction
+    | LeftHandSideExpression, "=", AssignmentExpression
+    | LeftHandSideExpression, AssignmentOperator, AssignmentExpression
+    | LeftHandSideExpression, "&&=", AssignmentExpression
+    | LeftHandSideExpression, "||=", AssignmentExpression
+    | LeftHandSideExpression, "??=", AssignmentExpression;
+
+AssignmentOperator
+    = "*="
+    | "/="
+    | "%="
+    | "+="
+    | "-="
+    | "<<="
+    | ">>="
+    | ">>>="
+    | "&="
+    | "^="
+    | "|="
+    | "**=";
+
+(* endregion *)
+Expression
+    = AssignmentExpression
+    | Expression, ",", AssignmentExpression;
+
+(* endregion *)
+(* region Destructuring Patterns *)
+AssignmentPattern
+    = ObjectAssignmentPattern
+    | ArrayAssignmentPattern;
+
+ObjectAssignmentPattern
+    = "{", "}"
+    | "{", AssignmentRestProperty, "}"
+    | "{", AssignmentPropertyList, "}"
+    | "{", AssignmentPropertyList, ",", [ AssignmentRestProperty ], "}";
+
+ArrayAssignmentPattern
+    = "[", [ Elision ], [ AssignmentRestElement ], "]"
+    | "[", AssignmentElementList, "]"
+    | "[", AssignmentElementList, ",", [ Elision ], [ AssignmentRestElement ], "]";
+
+AssignmentRestProperty
+    = "...", DestructuringAssignmentTarget;
+
+AssignmentPropertyList
+    = AssignmentProperty
+    | AssignmentPropertyList, ",", AssignmentProperty;
+
+AssignmentElementList
+    = AssignmentElisionElement
+    | AssignmentElementList, ",", AssignmentElisionElement;
+
+AssignmentElisionElement
+    = [ Elision ], AssignmentElement;
+
+AssignmentProperty
+    = IdentifierReference, [ Initializer ]
+    | PropertyName, ":", AssignmentElement;
+
+AssignmentElement
+    = DestructuringAssignmentTarget, [ Initializer ];
+
+AssignmentRestElement
+    = "...", DestructuringAssignmentTarget;
+
+DestructuringAssignmentTarget
+    = LeftHandSideExpression;
+
+(* endregion *)
+(* region Binding Patterns *)
+BindingPattern
+    = ObjectBindingPattern
+    | ArrayBindingPattern;
+
+ObjectBindingPattern
+    = "{", "}"
+    | "{", BindingRestProperty, "}"
+    | "{", BindingPropertyList, "}"
+    | "{", BindingPropertyList, ",", [ BindingRestProperty ], "}";
+
+ArrayBindingPattern
+    = "[", [ Elision ], [ BindingRestElement ], "]"
+    | "[", BindingElementList, "]"
+    | "[", BindingElementList, ",", [ Elision ], [ BindingRestElement ], "]";
+
+BindingRestProperty
+    = "...", BindingIdentifier;
+
+BindingPropertyList
+    = BindingProperty
+    | BindingPropertyList, ",", BindingProperty;
+
+BindingElementList
+    = BindingElisionElement
+    | BindingElementList, ",", BindingElisionElement;
+
+BindingElisionElement
+    = [ Elision ], BindingElement;
+
+BindingProperty
+    = SingleNameBinding
+    | PropertyName, ":", BindingElement;
+
+BindingElement
+    = SingleNameBinding
+    | BindingPattern, [ Initializer ];
+
+SingleNameBinding
+    = BindingIdentifier, [ Initializer ];
+
+BindingRestElement
+    = "...", BindingIdentifier
+    | "...", BindingPattern;
+
+(* endregion *)
+(* region Statements *)
+Statement
+    = BlockStatement
+    | VariableStatement
+    | EmptyStatement
+    | ExpressionStatement
+    | IfStatement
+    | BreakableStatement
+    | ContinueStatement
+    | BreakStatement
+    | ReturnStatement
+    | WithStatement
+    | LabelledStatement
+    | ThrowStatement
+    | TryStatement
+    | DebuggerStatement;
+
+(* region Statement List *)
+StatementListItem
+    = Statement
+    | Declaration;
+
+StatementList
+    = StatementListItem
+    | StatementList, StatementListItem;
+
+(* endregion *)
+(* region Block Statement *)
+BlockStatement
+    = Block;
+
+Block
+    = "{", [ StatementList ], "}";
+
+(* endregion *)
+(* region Variable Statement *)
+VariableStatement
+    = "var", VariableDeclarationList, ";";
+
+VariableDeclarationList
+    = VariableDeclaration
+    | VariableDeclarationList, ",", VariableDeclaration;
+
+VariableDeclaration
+    = BindingIdentifier, [ Initializer ]
+    | BindingPattern, Initializer;
+
+(* endregion *)
+(* region Empty and Expression Statements *)
+EmptyStatement
+    = ";";
+
+ExpressionStatement
+    = Expression, ";";
+
+(* endregion *)
+(* region Control Flow Statements *)
+IfStatement
+    = "if", "(", Expression, ")", Statement, "else", Statement
+    | "if", "(", Expression, ")", Statement;
+
+(* endregion *)
+(* region Iteration Statements *)
+IterationStatement
+    = DoWhileStatement
+    | WhileStatement
+    | ForStatement
+    | ForInOfStatement;
+
+DoWhileStatement
+    = "do", Statement, "while", "(", Expression, ")", ";";
+
+WhileStatement
+    = "while", "(", Expression, ")", Statement;
+
+ForStatement
+    = "for", "(", [ Expression ], ";", [ Expression ], ";", [ Expression ], ")", Statement
+    | "for", "(", "var", VariableDeclarationList, ";", [ Expression ], ";", [ Expression ], ")", Statement
+    | "for", "(", LexicalDeclaration, [ Expression ], ";", [ Expression ], ")", Statement;
+
+ForInOfStatement
+    = "for", "(", LeftHandSideExpression, "in", Expression, ")", Statement
+    | "for", "(", "var", ForBinding, "in", Expression, ")", Statement
+    | "for", "(", ForDeclaration, "in", Expression, ")", Statement
+    | "for", "(", LeftHandSideExpression, "of", AssignmentExpression, ")", Statement
+    | "for", "(", "var", ForBinding, "of", AssignmentExpression, ")", Statement
+    | "for", "(", ForDeclaration, "of", AssignmentExpression, ")", Statement
+    | "for", "await", "(", LeftHandSideExpression, "of", AssignmentExpression, ")", Statement
+    | "for", "await", "(", "var", ForBinding, "of", AssignmentExpression, ")", Statement
+    | "for", "await", "(", ForDeclaration, "of", AssignmentExpression, ")", Statement;
+
+ForDeclaration
+    = LetOrConst, ForBinding;
+
+ForBinding
+    = BindingIdentifier
+    | BindingPattern;
+
+BreakableStatement
+    = IterationStatement
+    | SwitchStatement;
+
+(* endregion *)
+(* region Jump Statements *)
+ContinueStatement
+    = "continue", ";"
+    | "continue", LabelIdentifier, ";";
+
+BreakStatement
+    = "break", ";"
+    | "break", LabelIdentifier, ";";
+
+ReturnStatement
+    = "return", ";"
+    | "return", Expression, ";";
+
+ThrowStatement
+    = "throw", Expression, ";";
+
+(* endregion *)
+(* region Switch Statement *)
+SwitchStatement
+    = "switch", "(", Expression, ")", CaseBlock;
+
+CaseBlock
+    = "{", [ CaseClauses ], "}"
+    | "{", [ CaseClauses ], DefaultClause, [ CaseClauses ], "}";
+
+CaseClauses
+    = CaseClause
+    | CaseClauses, CaseClause;
+
+CaseClause
+    = "case", Expression, ":", [ StatementList ];
+
+DefaultClause
+    = "default", ":", [ StatementList ];
+
+(* endregion *)
+(* region Labelled and With Statements *)
+LabelledStatement
+    = LabelIdentifier, ":", LabelledItem;
+
+LabelledItem
+    = Statement
+    | FunctionDeclaration;
+
+WithStatement
+    = "with", "(", Expression, ")", Statement;
+
+(* endregion *)
+(* region Try Catch Finally *)
+TryStatement
+    = "try", Block, Catch
+    | "try", Block, Finally
+    | "try", Block, Catch, Finally;
+
+Catch
+    = "catch", "(", CatchParameter, ")", Block
+    | "catch", Block;
+
+Finally
+    = "finally", Block;
+
+CatchParameter
+    = BindingIdentifier
+    | BindingPattern;
+
+(* endregion *)
+(* region Debug Statement *)
+DebuggerStatement
+    = "debugger", ";";
+
+(* endregion *)
+(* endregion *)
+(* region Declarations *)
+Declaration
+    = HoistableDeclaration
+    | ClassDeclaration
+    | LexicalDeclaration;
+
+(* region Hoistable Declaration *)
+HoistableDeclaration
+    = FunctionDeclaration
+    | GeneratorDeclaration
+    | AsyncFunctionDeclaration
+    | AsyncGeneratorDeclaration;
+
+(* region Function Definitions *)
+FunctionDeclaration
+    = "function", BindingIdentifier, "(", FormalParameters, ")", "{", FunctionBody, "}";
+
+FunctionExpression
+    = "function", [ BindingIdentifier ], "(", FormalParameters, ")", "{", FunctionBody, "}";
+
+FormalParameters
+    = [ FormalParameterList ];
+
+FormalParameterList
+    = FormalParameter
+    | FormalParameterList, ",", FormalParameter;
+
+FormalParameter
+    = BindingElement;
+
+UniqueFormalParameters
+    = FormalParameters;
+
+FunctionBody
+    = FunctionStatementList;
+
+FunctionStatementList
+    = [ StatementList ];
+
+(* endregion *)
+(* region Arrow Functions *)
+ArrowFunction
+    = ArrowParameters, "=>", ConciseBody;
+
+ArrowParameters
+    = BindingIdentifier
+    | CoverParenthesizedExpressionAndArrowParameterList;
+
+ConciseBody
+    = AssignmentExpression
+    | "{", FunctionBody, "}";
+
+(* endregion *)
+(* region Async Functions *)
+AsyncFunctionDeclaration
+    = "async", "function", BindingIdentifier, "(", FormalParameters, ")", "{", AsyncFunctionBody, "}";
+
+AsyncFunctionExpression
+    = "async", "function", [ BindingIdentifier ], "(", FormalParameters, ")", "{", AsyncFunctionBody, "}";
+
+AsyncFunctionBody
+    = FunctionBody;
+
+AsyncArrowFunction
+    = "async", AsyncArrowBindingIdentifier, "=>", AsyncConciseBody
+    | CoverCallExpressionAndAsyncArrowHead, "=>", AsyncConciseBody;
+
+AsyncConciseBody
+    = AssignmentExpression
+    | AsyncFunctionBody;
+
+AsyncArrowBindingIdentifier
+    = BindingIdentifier;
+
+(* endregion *)
+(* region Generator Functions *)
+GeneratorDeclaration
+    = "function", "*", BindingIdentifier, "(", FormalParameters, ")", "{", GeneratorBody, "}";
+
+GeneratorExpression
+    = "function", "*", [ BindingIdentifier ], "(", FormalParameters, ")", "{", GeneratorBody, "}";
+
+GeneratorBody
+    = FunctionBody;
+
+YieldExpression
+    = "yield"
+    | "yield", AssignmentExpression
+    | "yield", "*", AssignmentExpression;
+
+(* endregion *)
+(* region Async Generator Functions *)
+AsyncGeneratorDeclaration
+    = "async", "function", "*", BindingIdentifier, "(", FormalParameters, ")", "{", AsyncGeneratorBody, "}";
+
+AsyncGeneratorExpression
+    = "async", "function", "*", [ BindingIdentifier ], "(", FormalParameters, ")", "{", AsyncGeneratorBody, "}";
+
+AsyncGeneratorBody
+    = FunctionBody;
+
+(* endregion *)
+(* endregion *)
+(* region Class Definitions *)
+ClassDeclaration
+    = "class", BindingIdentifier, ClassTail
+    | "class", ClassTail;
+
+ClassExpression
+    = "class", [ BindingIdentifier ], ClassTail;
+
+ClassTail
+    = [ ClassHeritage ], "{", ClassBody, "}";
+
+ClassHeritage
+    = "extends", LeftHandSideExpression;
+
+ClassBody
+    = [ ClassElementList ];
+
+ClassElementList
+    = ClassElement
+    | ClassElementList, ClassElement;
+
+ClassElement
+    = MethodDefinition
+    | StaticBlock
+    | ";";
+
+StaticBlock
+    = "static", "{", ClassStaticBlockBody, "}";
+
+ClassStaticBlockBody
+    = ClassStaticBlockStatementList;
+
+ClassStaticBlockStatementList
+    = [ StatementList ];
+
+(* endregion *)
+(* region Lexical Declarations *)
+LexicalDeclaration
+    = LetOrConst, BindingList, ";";
+
+LetOrConst
+    = "let"
+    | "const";
+
+BindingList
+    = LexicalBinding
+    | BindingList, ",", LexicalBinding;
+
+LexicalBinding
+    = BindingIdentifier, [ Initializer ]
+    | BindingPattern, Initializer;
+
+(* endregion *)
+(* endregion *)
+(* region Method Definitions *)
+MethodDefinition
+    = ClassElementName, "(", UniqueFormalParameters, ")", "{", FunctionBody, "}"
+    | GeneratorMethod
+    | AsyncMethod
+    | AsyncGeneratorMethod
+    | "get", ClassElementName, "(", ")", "{", FunctionBody, "}"
+    | "set", ClassElementName, "(", PropertySetParameterList, ")", "{", FunctionBody, "}";
+
+GeneratorMethod
+    = "*", ClassElementName, "(", UniqueFormalParameters, ")", "{", GeneratorBody, "}";
+
+AsyncMethod
+    = "async", ClassElementName, "(", UniqueFormalParameters, ")", "{", AsyncFunctionBody, "}";
+
+AsyncGeneratorMethod
+    = "async", "*", ClassElementName, "(", UniqueFormalParameters, ")", "{", AsyncGeneratorBody, "}";
+
+ClassElementName
+    = PropertyName
+    | PrivateIdentifier;
+
+PropertySetParameterList
+    = FormalParameter;
+
+(* endregion *)
+(* region Modules *)
+Module
+    = [ ModuleBody ];
+
+(* region Module Body *)
+ModuleBody
+    = ModuleItemList;
+
+ModuleItemList
+    = ModuleItem
+    | ModuleItemList, ModuleItem;
+
+ModuleItem
+    = ImportDeclaration
+    | ExportDeclaration
+    | StatementListItem;
+
+(* endregion *)
+(* region Import Declarations *)
+ImportDeclaration
+    = "import", ImportClause, FromClause, ";"
+    | "import", ModuleSpecifier, ";";
+
+ImportClause
+    = ImportedDefaultBinding
+    | NameSpaceImport
+    | NamedImports
+    | ImportedDefaultBinding, ",", NameSpaceImport
+    | ImportedDefaultBinding, ",", NamedImports;
+
+ImportedDefaultBinding
+    = ImportedBinding;
+
+ImportedBinding
+    = BindingIdentifier;
+
+NameSpaceImport
+    = "*", "as", ImportedBinding;
+
+NamedImports
+    = "{", "}"
+    | "{", ImportsList, "}"
+    | "{", ImportsList, ",", "}";
+
+ImportsList
+    = ImportSpecifier
+    | ImportsList, ",", ImportSpecifier;
+
+ImportSpecifier
+    = ImportedBinding
+    | ModuleExportName, "as", ImportedBinding;
+
+ModuleExportName
+    = IdentifierName
+    | StringLiteral;
+
+FromClause
+    = "from", ModuleSpecifier;
+
+ModuleSpecifier
+    = StringLiteral;
+
+(* endregion *)
+(* region Export Declarations *)
+ExportDeclaration
+    = "export", , FromClause, ";"
+    | "export", , "as", ModuleExportName, FromClause, ";"
+    | "export", NamedExports, FromClause, ";"
+    | "export", NamedExports, ";"
+    | "export", VariableStatement
+    | "export", Declaration
+    | "export", "default", HoistableDeclaration
+    | "export", "default", ClassDeclaration
+    | "export", "default", AssignmentExpression, ";";
+
+NamedExports
+    = "{", "}"
+    | "{", ExportsList, "}"
+    | "{", ExportsList, ",", "}";
+
+ExportsList
+    = ExportSpecifier
+    | ExportsList, ",", ExportSpecifier;
+
+ExportSpecifier
+    = ModuleExportName
+    | ModuleExportName, "as", ModuleExportName;
+
+(* endregion *)
+(* endregion *)
+(* region Script *)
+Script
+    = [ ScriptBody ];
+
+ScriptBody
+    = StatementList;
+
+(* endregion *)

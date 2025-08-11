@@ -1,0 +1,1191 @@
+(* region Source and Characters *)
+SourceCharacter
+    = ? any Unicode code point from U+0000 to U+10FFFF ?;
+
+UnicodeIDStart
+    = ? any Unicode code point with the Unicode property ID_Start ?;
+
+UnicodeIDContinue
+    = ? any Unicode code point with the Unicode property ID_Continue ?;
+
+(* endregion *)
+(* region Whitespace and Line Terminators *)
+WhiteSpace
+    = ? U+0009 ? (* Tab *)
+    | ? U+000B ? (* Vertical Tab *)
+    | ? U+000C ? (* Form Feed *)
+    | ? U+0020 ? (* Space *)
+    | ? U+00A0 ? (* No-break space *)
+    | ? U+FEFF ? (* Byte Order Mark *)
+    | UnicodeSpaceSeparator;
+
+UnicodeSpaceSeparator
+    = ? any Unicode character in general category Zs ?;
+
+LineTerminator
+    = ? U+000A ? (* Line Feed *)
+    | ? U+000D ? (* Carriage Return *)
+    | ? U+2028 ? (* Line Separator *)
+    | ? U+2029 ? (* Paragraph Separator *);
+
+LineTerminatorSequence
+    = ? U+000A ?
+    | ? U+000D ?, ? U+000A ?
+    | ? U+000D ?
+    | ? U+2028 ?
+    | ? U+2029 ?;
+
+(* endregion *)
+(* region Comments and Directives *)
+Comment
+    = MultiLineComment
+    | SingleLineComment;
+
+MultiLineComment
+    = "/*", [ MultiLineCommentChars ], "*/";
+
+MultiLineCommentChars
+    = MultiLineNotAsteriskChar, [ MultiLineCommentChars ]
+    | "*", [ PostAsteriskCommentChars ];
+
+PostAsteriskCommentChars
+    = MultiLineNotForwardSlashOrAsteriskChar, [ MultiLineCommentChars ]
+    | "*", [ PostAsteriskCommentChars ];
+
+MultiLineNotAsteriskChar
+    = SourceCharacter - "*";
+
+MultiLineNotForwardSlashOrAsteriskChar
+    = SourceCharacter - ( "/"
+    | "*" );
+
+SingleLineComment
+    = "//", [ SingleLineCommentChars ];
+
+SingleLineCommentChars
+    = SingleLineCommentChar, [ SingleLineCommentChars ];
+
+SingleLineCommentChar
+    = SourceCharacter - ( LineTerminator );
+
+TripleSlashDirective
+    = "///", DirectiveContent, LineTerminator;
+
+DirectiveContent
+    = ReferenceDirective
+    | AmdModuleDirective
+    | AmdDependencyDirective;
+
+ReferenceDirective
+    = "<reference", ( PathReference
+    | TypesReference
+    | LibReference
+    | NoDefaultLibReference ), "/>";
+
+PathReference
+    = "path=", StringLiteral;
+
+TypesReference
+    = "types=", StringLiteral;
+
+LibReference
+    = "lib=", StringLiteral;
+
+NoDefaultLibReference
+    = "no-default-lib=", BooleanLiteral;
+
+JSDocComment
+    = "/**", { JSDocElement }, "*/";
+
+JSDocElement
+    = ? any characters until JSDocTag or "*/" ?
+    | JSDocTag;
+
+JSDocTag
+    = "@", Identifier, [ JSDocTagBody ];
+
+JSDocTagBody
+    = { ? any character except newline followed by "*/" ? };
+
+CompilerDirective
+    = TSIgnoreDirective
+    | TSExpectErrorDirective
+    | TSNoCheckDirective;
+
+TSIgnoreDirective
+    = "// @ts-ignore", [ ? any character except line terminator ? ];
+
+TSExpectErrorDirective
+    = "// @ts-expect-error", [ ? any character except line terminator ? ];
+
+TSNoCheckDirective
+    = "// @ts-nocheck";
+
+PragmaDirective
+    = "/** @jsx", Identifier, "*/"
+    | "/** @jsxFrag", Identifier, "*/"
+    | "/** @jsxImportSource", StringLiteral, "*/";
+
+(* endregion *)
+(* region Tokens and Punctuators *)
+Token
+    = IdentifierName
+    | Punctuator
+    | NumericLiteral
+    | StringLiteral
+    | Template;
+
+Punctuator
+    = "{"
+    | "}"
+    | "("
+    | ")"
+    | "["
+    | "]"
+    | "."
+    | "..."
+    | ";"
+    | ","
+    | "<"
+    | ">"
+    | "<="
+    | ">="
+    | "=="
+    | "!="
+    | "==="
+    | "!=="
+    | "+"
+    | "-"
+    | "*"
+    | "%"
+    | "**"
+    | "++"
+    | "--"
+    | "<<"
+    | ">>"
+    | ">>>"
+    | "&"
+    | "|"
+    | "^"
+    | "!"
+    | "~"
+    | "&&"
+    | "||"
+    | "??"
+    | "?"
+    | ":"
+    | "="
+    | "+="
+    | "-="
+    | "*="
+    | "%="
+    | "**="
+    | "<<="
+    | ">>="
+    | ">>>="
+    | "&="
+    | "|="
+    | "^="
+    | "&&="
+    | "||="
+    | "??="
+    | "=>"
+    | "/"
+    | "/="
+    | "@";
+
+(* endregion *)
+(* region Literals *)
+Literal
+    = NullLiteral
+    | BooleanLiteral
+    | NumericLiteral
+    | StringLiteral
+    | RegularExpressionLiteral
+    | TemplateLiteral;
+
+(* region Null Literal *)
+NullLiteral
+    = "null";
+
+(* endregion *)
+(* region Boolean Literal *)
+BooleanLiteral
+    = "true"
+    | "false";
+
+(* endregion *)
+(* region Numeric Literal *)
+NumericLiteral
+    = DecimalLiteral
+    | BinaryIntegerLiteral
+    | OctalIntegerLiteral
+    | HexIntegerLiteral
+    | BigIntLiteral;
+
+DecimalLiteral
+    = DecimalIntegerLiteral, ".", [ DecimalDigits ], [ ExponentPart ]
+    | ".", DecimalDigits, [ ExponentPart ]
+    | DecimalIntegerLiteral, [ ExponentPart ];
+
+DecimalIntegerLiteral
+    = "0"
+    | NonZeroDigit, [ DecimalDigits ];
+
+DecimalDigits
+    = { DecimalDigit };
+
+DecimalDigit
+    = "0"
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9";
+
+NonZeroDigit
+    = "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7"
+    | "8"
+    | "9";
+
+ExponentPart
+    = ExponentIndicator, SignedInteger;
+
+ExponentIndicator
+    = "e"
+    | "E";
+
+SignedInteger
+    = [ "+"
+    | "-" ], DecimalDigits;
+
+BinaryIntegerLiteral
+    = "0", ( "b"
+    | "B" ), BinaryDigits;
+
+BinaryDigits
+    = "0"
+    | "1";
+
+OctalIntegerLiteral
+    = "0", ( "o"
+    | "O" ), OctalDigits;
+
+OctalDigits
+    = "0"
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "5"
+    | "6"
+    | "7";
+
+HexIntegerLiteral
+    = "0", ( "x"
+    | "X" ), HexDigits;
+
+HexDigits
+    = { HexDigit };
+
+HexDigit
+    = DecimalDigit
+    | "a"
+    | "b"
+    | "c"
+    | "d"
+    | "e"
+    | "f"
+    | "A"
+    | "B"
+    | "C"
+    | "D"
+    | "E"
+    | "F";
+
+BigIntLiteral
+    = ( DecimalIntegerLiteral
+    | BinaryIntegerLiteral
+    | OctalIntegerLiteral
+    | HexIntegerLiteral ), "n";
+
+(* endregion *)
+(* region String Literal *)
+StringLiteral
+    = '"', [ DoubleStringCharacters ], '"'
+    | "'", [ SingleStringCharacters ], "'";
+
+DoubleStringCharacters
+    = { SourceCharacter - ( '"'
+    | "\\"
+    | LineTerminator )
+    | EscapeSequence };
+
+SingleStringCharacters
+    = { SourceCharacter - ( "'"
+    | "\\"
+    | LineTerminator )
+    | EscapeSequence };
+
+EscapeSequence
+    = CharacterEscapeSequence
+    | "0"
+    | HexEscapeSequence
+    | UnicodeEscapeSequence;
+
+CharacterEscapeSequence
+    = SingleEscapeCharacter
+    | NonEscapeCharacter;
+
+SingleEscapeCharacter
+    = "'"
+    | '"'
+    | "\\"
+    | "b"
+    | "f"
+    | "n"
+    | "r"
+    | "t"
+    | "v";
+
+NonEscapeCharacter
+    = SourceCharacter - ( EscapeCharacter
+    | LineTerminator );
+
+EscapeCharacter
+    = SingleEscapeCharacter
+    | DecimalDigit
+    | "x"
+    | "u";
+
+HexEscapeSequence
+    = "x", HexDigit, HexDigit;
+
+UnicodeEscapeSequence
+    = "u", HexDigit, HexDigit, HexDigit, HexDigit
+    | "u{", HexDigits, "}";
+
+RegularExpressionLiteral
+    = "/", RegularExpressionBody, "/", [ RegularExpressionFlags ];
+
+RegularExpressionBody
+    = RegularExpressionFirstChar, { RegularExpressionChar };
+
+RegularExpressionFirstChar
+    = SourceCharacter - ( "*"
+    | "\\"
+    | "/"
+    | "["
+    | LineTerminator );
+
+RegularExpressionChar
+    = SourceCharacter - ( "\\"
+    | "/"
+    | "["
+    | LineTerminator );
+
+RegularExpressionFlags
+    = { IdentifierPart };
+
+TemplateLiteral
+    = NoSubstitutionTemplate
+    | Template;
+
+NoSubstitutionTemplate
+    = "`", { TemplateCharacter }, "`";
+
+Template
+    = TemplateHead, Expression, TemplateSpans;
+
+TemplateSpans
+    = TemplateTail
+    | TemplateMiddle, Expression, TemplateSpans;
+
+TemplateHead
+    = "`", { TemplateCharacter }, "${";
+
+TemplateMiddle
+    = "}", { TemplateCharacter }, "${";
+
+TemplateTail
+    = "}", { TemplateCharacter }, "`";
+
+TemplateCharacter
+    = SourceCharacter - ( "`"
+    | "\\"
+    | "$"
+    | LineTerminator )
+    | EscapeSequence;
+
+(* endregion *)
+(* endregion *)
+(* region Identifiers *)
+Identifier
+    = IdentifierName - ( ReservedWord );
+
+IdentifierName
+    = IdentifierStart, { IdentifierPart };
+
+IdentifierStart
+    = UnicodeIDStart
+    | "$"
+    | "_"
+    | "\\", UnicodeEscapeSequence;
+
+IdentifierPart
+    = UnicodeIDContinue
+    | "$"
+    | "_"
+    | "\\", UnicodeEscapeSequence
+    | ? U+200C ?
+    | ? U+200D ?;
+
+ReservedWord
+    = Keyword
+    | FutureReservedWord
+    | NullLiteral
+    | BooleanLiteral;
+
+Keyword
+    = "await"
+    | "break"
+    | "case"
+    | "catch"
+    | "class"
+    | "const"
+    | "continue"
+    | "debugger"
+    | "default"
+    | "delete"
+    | "do"
+    | "else"
+    | "enum"
+    | "export"
+    | "extends"
+    | "finally"
+    | "for"
+    | "function"
+    | "if"
+    | "import"
+    | "in"
+    | "instanceof"
+    | "new"
+    | "return"
+    | "super"
+    | "switch"
+    | "this"
+    | "throw"
+    | "try"
+    | "typeof"
+    | "var"
+    | "void"
+    | "while"
+    | "with"
+    | "yield" (* TypeScript Keywords *)
+    | "implements"
+    | "interface"
+    | "let"
+    | "package"
+    | "private"
+    | "protected"
+    | "public"
+    | "static"
+    | "declare"
+    | "module"
+    | "namespace"
+    | "require"
+    | "type"
+    | "abstract"
+    | "async"
+    | "is"
+    | "readonly"
+    | "override";
+
+FutureReservedWord
+    = "enum";
+
+(* endregion *)
+(* region Type System Grammar *)
+TypeAnnotation
+    = ":", Type;
+
+Type
+    = UnionType;
+
+UnionType
+    = IntersectionType, { "|", IntersectionType };
+
+IntersectionType
+    = TypeOperatorType, { "&", TypeOperatorType };
+
+TypeOperatorType
+    = { "keyof"
+    | "unique"
+    | "readonly" }, ArrayType;
+
+ArrayType
+    = NonArrayType, { "[", "]" };
+
+NonArrayType
+    = ParenthesizedType
+    | TypeReference
+    | ObjectType
+    | TupleType
+    | ConditionalType
+    | FunctionType
+    | ConstructorType
+    | TypeQuery
+    | ThisType
+    | LiteralType
+    | TemplateLiteralType
+    | ImportType
+    | InferType;
+
+ParenthesizedType
+    = "(", Type, ")";
+
+ThisType
+    = "this";
+
+LiteralType
+    = StringLiteral
+    | NumericLiteral
+    | BooleanLiteral
+    | "null"
+    | "undefined"
+    | BigIntLiteral;
+
+ImportType
+    = "import", "(", StringLiteral, ")", [ ".", IdentifierName ];
+
+ObjectType
+    = "{", [ TypeMemberList ], "}";
+
+TypeMemberList
+    = TypeMember, { ( ";"
+    | "," ), TypeMember }, [ ";"
+    | "," ];
+
+TypeMember
+    = PropertySignature
+    | MethodSignature
+    | CallSignature
+    | ConstructSignature
+    | IndexSignature
+    | GetAccessorDeclaration
+    | SetAccessorDeclaration;
+
+PropertySignature
+    = [ Modifiers ], PropertyName, [ "?" ], [ TypeAnnotation ];
+
+MethodSignature
+    = [ Modifiers ], PropertyName, [ "?" ], [ TypeParameters ], "(", [ ParameterList ], ")", [ TypeAnnotation ];
+
+IndexSignature
+    = [ Modifiers ], "[", Identifier, ":", ( "string"
+    | "number"
+    | "symbol" ), "]", TypeAnnotation;
+
+CallSignature
+    = [ TypeParameters ], "(", [ ParameterList ], ")", [ TypeAnnotation ];
+
+ConstructSignature
+    = "new", [ TypeParameters ], "(", [ ParameterList ], ")", [ TypeAnnotation ];
+
+TypeAliasDeclaration
+    = "type", Identifier, [ TypeParameters ], "=", Type, ";";
+
+TypeParameters
+    = "<", TypeParameter, { ",", TypeParameter }, ">";
+
+TypeParameter
+    = Identifier, [ Constraint ], [ DefaultType ];
+
+Constraint
+    = "extends", Type;
+
+DefaultType
+    = "=", Type;
+
+TypeReference
+    = TypeName, [ TypeArguments ];
+
+TypeArguments
+    = "<", Type, { ",", Type }, ">";
+
+TypeName
+    = Identifier
+    | QualifiedName;
+
+QualifiedName
+    = TypeName, ".", IdentifierName;
+
+ConditionalType
+    = Type, "extends", Type, "?", Type, ":", Type;
+
+InferType
+    = "infer", Identifier;
+
+MappedType
+    = "{", [ MappedTypeModifiers ], "[", TypeParameter, "in", Type, [ "as", Type ], "]", [ MappedTypeModifiers ], [ TypeAnnotation ], "}";
+
+MappedTypeModifiers
+    = [ "+"
+    | "-" ], ( "readonly"
+    | "?" );
+
+TemplateLiteralType
+    = "`", { TemplateHead, Type, ( TemplateMiddle
+    | TemplateTail ) }, "`";
+
+TupleType
+    = "[", [ TupleElement, { ",", TupleElement } ], "]";
+
+TupleElement
+    = [ "...",  ], Type, [ "?" ];
+
+FunctionType
+    = [ TypeParameters ], "(", [ ParameterList ], ")", "=>", Type;
+
+ConstructorType
+    = "new", [ TypeParameters ], "(", [ ParameterList ], ")", "=>", Type;
+
+TypeQuery
+    = "typeof", ( IdentifierReference
+    | QualifiedName );
+
+IndexedAccessType
+    = Type, "[", Type, "]";
+
+(* endregion *)
+(* region Expressions *)
+PrimaryExpression
+    = "this"
+    | IdentifierReference
+    | Literal
+    | ArrayLiteral
+    | ObjectLiteral
+    | FunctionExpression
+    | ClassExpression
+    | RegularExpressionLiteral
+    | TemplateLiteral
+    | ParenthesizedExpression
+    | JsxElement
+    | JsxFragment;
+
+ParenthesizedExpression
+    = "(", Expression, ")";
+
+LeftHandSideExpression
+    = NewExpression
+    | CallExpression
+    | NonNullExpression;
+
+MemberExpression
+    = PrimaryExpression
+    | MemberExpression, ( "[", Expression, "]"
+    | ".", IdentifierName
+    | TemplateLiteral )
+    | "super", ( "[", Expression, "]"
+    | ".", IdentifierName )
+    | "new", ".", "target"
+    | "new", MemberExpression, Arguments;
+
+NewExpression
+    = MemberExpression
+    | "new", NewExpression;
+
+CallExpression
+    = "super", Arguments
+    | CallExpression, ( Arguments
+    | "[", Expression, "]"
+    | ".", IdentifierName
+    | TemplateLiteral );
+
+Arguments
+    = [ TypeArguments ], "(", [ ArgumentList, [ "," ] ], ")";
+
+ArgumentList
+    = AssignmentExpression
+    | "...", AssignmentExpression
+    | ArgumentList, ",", ( AssignmentExpression
+    | "...", AssignmentExpression );
+
+NonNullExpression
+    = ( MemberExpression
+    | CallExpression ), "!";
+
+UpdateExpression
+    = LeftHandSideExpression, ( "++"
+    | "--" )
+    | ( "++"
+    | "--" ), UnaryExpression;
+
+UnaryExpression
+    = UpdateExpression
+    | "delete", UnaryExpression
+    | "void", UnaryExpression
+    | "typeof", UnaryExpression
+    | "+", UnaryExpression
+    | "-", UnaryExpression
+    | "~", UnaryExpression
+    | "!", UnaryExpression
+    | AwaitExpression
+    | TypeAssertion;
+
+TypeAssertion
+    = "<", Type, ">", UnaryExpression
+    | UnaryExpression, "as", Type;
+
+AwaitExpression
+    = "await", UnaryExpression;
+
+ExponentiationExpression
+    = UnaryExpression, [ "**", ExponentiationExpression ];
+
+MultiplicativeExpression
+    = ExponentiationExpression, { ( "*"
+    | "/"
+    | "%" ), ExponentiationExpression };
+
+AdditiveExpression
+    = MultiplicativeExpression, { ( "+"
+    | "-" ), MultiplicativeExpression };
+
+ShiftExpression
+    = AdditiveExpression, { ( "<<"
+    | ">>"
+    | ">>>" ), AdditiveExpression };
+
+RelationalExpression
+    = ShiftExpression, { ( "<"
+    | ">"
+    | "<="
+    | ">="
+    | "instanceof"
+    | "in" ), ShiftExpression };
+
+EqualityExpression
+    = RelationalExpression, { ( "=="
+    | "!="
+    | "==="
+    | "!==" ), RelationalExpression };
+
+BitwiseANDExpression
+    = EqualityExpression, { "&", EqualityExpression };
+
+BitwiseXORExpression
+    = BitwiseANDExpression, { "^", BitwiseANDExpression };
+
+BitwiseORExpression
+    = BitwiseXORExpression, { "|", BitwiseXORExpression };
+
+LogicalANDExpression
+    = BitwiseORExpression, { "&&", BitwiseORExpression };
+
+LogicalORExpression
+    = LogicalANDExpression, { "||", LogicalANDExpression };
+
+CoalesceExpression
+    = LogicalORExpression, { "??", LogicalORExpression };
+
+ConditionalExpression
+    = CoalesceExpression, [ "?", AssignmentExpression, ":", AssignmentExpression ];
+
+AssignmentExpression
+    = ConditionalExpression
+    | ArrowFunction
+    | YieldExpression
+    | LeftHandSideExpression, ( "="
+    | "+="
+    | "-="
+    | "*="
+    | "/="
+    | "%="
+    | "**="
+    | "<<="
+    | ">>="
+    | ">>>="
+    | "&="
+    | "^="
+    | "|="
+    | "&&="
+    | "||="
+    | "??=" ), AssignmentExpression;
+
+Expression
+    = AssignmentExpression, { ",", AssignmentExpression };
+
+(* endregion *)
+(* region Statements and Declarations *)
+SourceFile
+    = { TripleSlashDirective }, { Statement };
+
+Statement
+    = BlockStatement
+    | VariableStatement
+    | EmptyStatement
+    | ExpressionStatement
+    | IfStatement
+    | IterationStatement
+    | ContinueStatement
+    | BreakStatement
+    | ReturnStatement
+    | WithStatement
+    | LabelledStatement
+    | SwitchStatement
+    | ThrowStatement
+    | TryStatement
+    | DebuggerStatement
+    | Declaration;
+
+StatementListItem
+    = Statement
+    | Declaration;
+
+StatementList
+    = { StatementListItem };
+
+BlockStatement
+    = "{", [ StatementList ], "}";
+
+EmptyStatement
+    = ";";
+
+ExpressionStatement
+    = Expression, ";";
+
+Declaration
+    = ClassDeclaration
+    | FunctionDeclaration
+    | GeneratorDeclaration
+    | AsyncFunctionDeclaration
+    | AsyncGeneratorDeclaration
+    | InterfaceDeclaration
+    | TypeAliasDeclaration
+    | EnumDeclaration
+    | NamespaceDeclaration
+    | ModuleDeclaration
+    | ImportDeclaration
+    | ExportDeclaration
+    | AmbientDeclaration
+    | LexicalDeclaration;
+
+LexicalDeclaration
+    = ( "let"
+    | "const" ), BindingList, ";";
+
+BindingList
+    = LexicalBinding, { ",", LexicalBinding };
+
+LexicalBinding
+    = ( BindingIdentifier
+    | BindingPattern ), [ TypeAnnotation ], [ Initializer ];
+
+VariableStatement
+    = "var", VariableDeclarationList, ";";
+
+VariableDeclarationList
+    = VariableDeclaration, { ",", VariableDeclaration };
+
+VariableDeclaration
+    = ( BindingIdentifier
+    | BindingPattern ), [ TypeAnnotation ], [ Initializer ];
+
+Initializer
+    = "=", AssignmentExpression;
+
+BindingPattern
+    = ObjectBindingPattern
+    | ArrayBindingPattern;
+
+ObjectBindingPattern
+    = "{", { BindingProperty, [ "," ] }, [ BindingRestProperty ], "}";
+
+ArrayBindingPattern
+    = "[", { BindingElement, [ "," ] }, [ BindingRestElement ], "]";
+
+BindingProperty
+    = PropertyName, ":", BindingElement
+    | SingleNameBinding;
+
+BindingElement
+    = BindingPattern, [ Initializer ]
+    | SingleNameBinding;
+
+SingleNameBinding
+    = BindingIdentifier, [ Initializer ];
+
+BindingRestProperty
+    = "...", BindingIdentifier;
+
+BindingRestElement
+    = "...", BindingIdentifier;
+
+IfStatement
+    = "if", "(", Expression, ")", Statement, [ "else", Statement ];
+
+IterationStatement
+    = "do", Statement, "while", "(", Expression, ")", ";"
+    | "while", "(", Expression, ")", Statement
+    | "for", "(", ( [ Expression ], ";", [ Expression ], ";", [ Expression ]
+    | LexicalDeclaration, [ Expression ], ";", [ Expression ]
+    | LeftHandSideExpression, ( "in"
+    | "of" ), AssignmentExpression
+    | ( "var"
+    | "let"
+    | "const" ), BindingIdentifier, ( "in"
+    | "of" ), AssignmentExpression ), ")", Statement;
+
+ContinueStatement
+    = "continue", [ Identifier ], ";";
+
+BreakStatement
+    = "break", [ Identifier ], ";";
+
+ReturnStatement
+    = "return", [ Expression ], ";";
+
+WithStatement
+    = "with", "(", Expression, ")", Statement;
+
+LabelledStatement
+    = LabelIdentifier, ":", Statement;
+
+SwitchStatement
+    = "switch", "(", Expression, ")", "{", { CaseClause }, "}";
+
+CaseClause
+    = "case", Expression, ":", [ StatementList ]
+    | "default", ":", [ StatementList ];
+
+ThrowStatement
+    = "throw", Expression, ";";
+
+TryStatement
+    = "try", BlockStatement, [ CatchClause ], [ FinallyClause ];
+
+CatchClause
+    = "catch", [ "(", BindingIdentifier
+    | BindingPattern, [ TypeAnnotation ], ")" ], BlockStatement;
+
+FinallyClause
+    = "finally", BlockStatement;
+
+DebuggerStatement
+    = "debugger", ";";
+
+(* endregion *)
+(* region Functions and Classes *)
+FunctionDeclaration
+    = [ "async" ], "function", BindingIdentifier, [ TypeParameters ], "(", [ ParameterList ], ")", [ TypeAnnotation ], BlockStatement;
+
+FunctionExpression
+    = [ "async" ], "function", [ BindingIdentifier ], [ TypeParameters ], "(", [ ParameterList ], ")", [ TypeAnnotation ], BlockStatement;
+
+GeneratorDeclaration
+    = [ "async" ], "function", "*", BindingIdentifier, [ TypeParameters ], "(", [ ParameterList ], ")", [ TypeAnnotation ], BlockStatement;
+
+ArrowFunction
+    = ArrowParameters, [ TypeAnnotation ], "=>", ( Expression
+    | BlockStatement );
+
+ArrowParameters
+    = BindingIdentifier
+    | "(", [ ParameterList ], ")";
+
+YieldExpression
+    = "yield", [ "*" ], [ Expression ];
+
+ParameterList
+    = Parameter, { ",", Parameter };
+
+Parameter
+    = { Decorator }, [ Modifiers ], [ "..." ], BindingIdentifier, [ "?" ], [ TypeAnnotation ], [ Initializer ];
+
+Decorator
+    = "@", LeftHandSideExpression;
+
+Modifiers
+    = { "public"
+    | "private"
+    | "protected"
+    | "readonly"
+    | "static"
+    | "abstract"
+    | "override" };
+
+ClassDeclaration
+    = { Decorator }, [ Modifiers ], "class", BindingIdentifier, [ TypeParameters ], [ HeritageClause ], "{", { ClassElement }, "}";
+
+ClassExpression
+    = [ Modifiers ], "class", [ BindingIdentifier ], [ TypeParameters ], [ HeritageClause ], "{", { ClassElement }, "}";
+
+HeritageClause
+    = ( "extends"
+    | "implements" ), TypeReference, { ",", TypeReference };
+
+ClassElement
+    = MethodDeclaration
+    | PropertyDeclaration
+    | ConstructorDeclaration
+    | IndexSignature
+    | ";";
+
+ConstructorDeclaration
+    = { Decorator }, [ Modifiers ], "constructor", "(", [ ParameterList ], ")", BlockStatement;
+
+PropertyDeclaration
+    = { Decorator }, [ Modifiers ], PropertyName, [ "?"
+    | "!" ], [ TypeAnnotation ], [ Initializer ], ";";
+
+MethodDeclaration
+    = { Decorator }, [ "async" ], [ Modifiers ], [ "*" ], PropertyName, [ "?" ], [ TypeParameters ], "(", [ ParameterList ], ")", [ TypeAnnotation ], ( BlockStatement
+    | ";" );
+
+GetAccessorDeclaration
+    = { Decorator }, [ Modifiers ], "get", PropertyName, "(", ")", [ TypeAnnotation ], BlockStatement;
+
+SetAccessorDeclaration
+    = { Decorator }, [ Modifiers ], "set", PropertyName, "(", Parameter, ")", BlockStatement;
+
+InterfaceDeclaration
+    = "interface", Identifier, [ TypeParameters ], [ HeritageClause ], ObjectType;
+
+EnumDeclaration
+    = [ "const" ], "enum", Identifier, "{", [ EnumMember, { ",", EnumMember } ], "}";
+
+EnumMember
+    = Identifier, [ "=", ( StringLiteral
+    | NumericLiteral ) ];
+
+(* endregion *)
+(* region Modules and Namespaces *)
+ImportDeclaration
+    = "import", ( ImportClause, "from", StringLiteral
+    | StringLiteral ), ";";
+
+ImportClause
+    = ImportedDefaultBinding
+    | NameSpaceImport
+    | NamedImports
+    | ImportedDefaultBinding, ",", ( NameSpaceImport
+    | NamedImports );
+
+ImportedDefaultBinding
+    = Identifier;
+
+NameSpaceImport
+    = "*", "as", Identifier;
+
+NamedImports
+    = "{", [ ImportsList, [ "," ] ], "}";
+
+ImportsList
+    = ImportSpecifier, { ",", ImportSpecifier };
+
+ImportSpecifier
+    = [ "type" ], Identifier, [ "as", Identifier ];
+
+ExportDeclaration
+    = "export", ( "*", [ "as", Identifier ], "from", StringLiteral
+    | "type", "*"
+    | ExportClause, [ "from", StringLiteral ]
+    | Declaration
+    | "default", ( Expression
+    | Declaration ) ), ";";
+
+ExportClause
+    = "{", [ ExportsList, [ "," ] ], "}";
+
+ExportsList
+    = ExportSpecifier, { ",", ExportSpecifier };
+
+ExportSpecifier
+    = [ "type" ], Identifier, [ "as", Identifier ];
+
+NamespaceDeclaration
+    = "namespace", Identifier, { ".", Identifier }, BlockStatement;
+
+AmbientDeclaration
+    = "declare", ( VariableStatement
+    | FunctionDeclaration
+    | ClassDeclaration
+    | EnumDeclaration
+    | NamespaceDeclaration
+    | ModuleDeclaration );
+
+ModuleDeclaration
+    = "module", ( Identifier
+    | StringLiteral ), BlockStatement;
+
+(* endregion *)
+(* region JSX TSX Syntax *)
+JsxElement
+    = JsxSelfClosingElement
+    | ( JsxOpeningElement, { JsxChild }, JsxClosingElement );
+
+JsxSelfClosingElement
+    = "<", JsxElementName, { JsxAttribute }, "/>";
+
+JsxOpeningElement
+    = "<", JsxElementName, { JsxAttribute }, ">";
+
+JsxClosingElement
+    = "</", JsxElementName, ">";
+
+JsxElementName
+    = Identifier
+    | JsxNamespacedName
+    | JsxMemberExpression;
+
+JsxNamespacedName
+    = Identifier, ":", Identifier;
+
+JsxMemberExpression
+    = JsxElementName, ".", Identifier;
+
+JsxFragment
+    = "<>", { JsxChild }, "</>";
+
+JsxChild
+    = JsxText
+    | JsxElement
+    | JsxFragment
+    | JsxExpressionContainer;
+
+JsxText
+    = { ? any character except '{', '<', '>' ? };
+
+JsxAttribute
+    = JsxSpreadAttribute
+    | JsxNamedAttribute;
+
+JsxSpreadAttribute
+    = "{", "...", AssignmentExpression, "}";
+
+JsxNamedAttribute
+    = JsxAttributeName, [ "=", JsxAttributeValue ];
+
+JsxAttributeName
+    = Identifier
+    | JsxNamespacedName;
+
+JsxAttributeValue
+    = StringLiteral
+    | JsxExpressionContainer;
+
+JsxExpressionContainer
+    = "{", [ AssignmentExpression ], "}";
+
+(* endregion *)

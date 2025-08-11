@@ -1,0 +1,555 @@
+(* ECMAScript 2026 W3C EBNF Grammar *)
+
+(* === LEXICAL GRAMMAR === *)
+
+SourceCharacter ::= #x0000-#x10FFFF
+
+WhiteSpace ::= #x0009 | #x000B | #x000C | #x0020 | #x00A0 | #xFEFF | UnicodeSpaceSeparator
+
+UnicodeSpaceSeparator ::= (* Any Unicode character in general category "Zs" *)
+
+LineTerminator ::= #x000A | #x000D | #x2028 | #x2029
+
+LineTerminatorSequence ::= #x000A | #x000D #x000A | #x000D | #x2028 | #x2029
+
+Comment ::= MultiLineComment | SingleLineComment
+
+MultiLineComment ::= "/*" MultiLineCommentChars? "*/"
+
+MultiLineCommentChars ::= MultiLineNotAsteriskChar MultiLineCommentChars? | "*" PostAsteriskCommentChars?
+
+PostAsteriskCommentChars ::= MultiLineNotForwardSlashOrAsteriskChar MultiLineCommentChars? | "*" PostAsteriskCommentChars?
+
+MultiLineNotAsteriskChar ::= SourceCharacter - "*"
+
+MultiLineNotForwardSlashOrAsteriskChar ::= SourceCharacter - ("/" | "*")
+
+SingleLineComment ::= "//" SingleLineCommentChars?
+
+SingleLineCommentChars ::= SingleLineCommentChar SingleLineCommentChars?
+
+SingleLineCommentChar ::= SourceCharacter - LineTerminator
+
+Token ::= IdentifierName | Punctuator | NumericLiteral | StringLiteral | Template
+
+Punctuator ::= "{" | "}" | "(" | ")" | "[" | "]" | "." | "..." | ";" | "," | "<" | ">" | "<=" | ">=" | "==" | "!=" | "===" | "!==" | "+" | "-" | "*" | "%" | "++" | "--" | "<<" | ">>" | ">>>" | "&" | "|" | "^" | "!" | "~" | "&&" | "||" | "??" | "?" | ":" | "=" | "+=" | "-=" | "*=" | "%=" | "<<=" | ">>=" | ">>>=" | "&=" | "|=" | "^=" | "&&=" | "||=" | "??=" | "**" | "**=" | "=>" | "/" | "/="
+
+DivPunctuator ::= "/" | "/="
+
+RightBracePunctuator ::= "}"
+
+NullLiteral ::= "null"
+
+BooleanLiteral ::= "true" | "false"
+
+NumericLiteral ::= DecimalLiteral | BinaryIntegerLiteral | OctalIntegerLiteral | HexIntegerLiteral | BigIntLiteral
+
+DecimalLiteral ::= DecimalIntegerLiteral "." DecimalDigits? ExponentPart? | "." DecimalDigits ExponentPart? | DecimalIntegerLiteral ExponentPart?
+
+DecimalIntegerLiteral ::= "0" | NonZeroDigit DecimalDigits?
+
+DecimalDigits ::= DecimalDigit+
+
+DecimalDigit ::= [0-9]
+
+NonZeroDigit ::= [1-9]
+
+ExponentPart ::= ExponentIndicator SignedInteger
+
+ExponentIndicator ::= "e" | "E"
+
+SignedInteger ::= DecimalDigits | "+" DecimalDigits | "-" DecimalDigits
+
+BinaryIntegerLiteral ::= "0" [bB] BinaryDigits
+
+BinaryDigits ::= BinaryDigit+
+
+BinaryDigit ::= [01]
+
+OctalIntegerLiteral ::= "0" [oO] OctalDigits
+
+OctalDigits ::= OctalDigit+
+
+OctalDigit ::= [0-7]
+
+HexIntegerLiteral ::= "0" [xX] HexDigits
+
+HexDigits ::= HexDigit+
+
+HexDigit ::= [0-9a-fA-F]
+
+BigIntLiteral ::= DecimalBigIntegerLiteral | BinaryBigIntegerLiteral | OctalBigIntegerLiteral | HexBigIntegerLiteral
+
+DecimalBigIntegerLiteral ::= DecimalIntegerLiteral "n"
+
+BinaryBigIntegerLiteral ::= BinaryIntegerLiteral "n"
+
+OctalBigIntegerLiteral ::= OctalIntegerLiteral "n"
+
+HexBigIntegerLiteral ::= HexIntegerLiteral "n"
+
+StringLiteral ::= '"' DoubleStringCharacters? '"' | "'" SingleStringCharacters? "'"
+
+DoubleStringCharacters ::= DoubleStringCharacter+
+
+SingleStringCharacters ::= SingleStringCharacter+
+
+DoubleStringCharacter ::= SourceCharacter - ('"' | "\" | LineTerminator) | "\" EscapeSequence | LineContinuation
+
+SingleStringCharacter ::= SourceCharacter - ("'" | "\" | LineTerminator) | "\" EscapeSequence | LineContinuation
+
+LineContinuation ::= "\" LineTerminatorSequence
+
+EscapeSequence ::= CharacterEscapeSequence | "0" | HexEscapeSequence | UnicodeEscapeSequence
+
+CharacterEscapeSequence ::= SingleEscapeCharacter | NonEscapeCharacter
+
+SingleEscapeCharacter ::= "'" | '"' | "\" | "b" | "f" | "n" | "r" | "t" | "v"
+
+NonEscapeCharacter ::= SourceCharacter - (EscapeCharacter | LineTerminator)
+
+EscapeCharacter ::= SingleEscapeCharacter | DecimalDigit | "x" | "u"
+
+HexEscapeSequence ::= "x" HexDigit HexDigit
+
+UnicodeEscapeSequence ::= "u" HexDigit HexDigit HexDigit HexDigit | "u{" CodePoint "}"
+
+CodePoint ::= HexDigits
+
+RegularExpressionLiteral ::= "/" RegularExpressionBody "/" RegularExpressionFlags?
+
+RegularExpressionBody ::= RegularExpressionFirstChar RegularExpressionChars?
+
+RegularExpressionChars ::= RegularExpressionChar+
+
+RegularExpressionFirstChar ::= RegularExpressionNonTerminator - ("*" | "\" | "/" | "[") | RegularExpressionBackslashSequence | RegularExpressionClass
+
+RegularExpressionChar ::= RegularExpressionNonTerminator - ("\" | "/" | "[") | RegularExpressionBackslashSequence | RegularExpressionClass
+
+RegularExpressionBackslashSequence ::= "\" RegularExpressionNonTerminator
+
+RegularExpressionNonTerminator ::= SourceCharacter - LineTerminator
+
+RegularExpressionClass ::= "[" RegularExpressionClassChars? "]"
+
+RegularExpressionClassChars ::= RegularExpressionClassChar+
+
+RegularExpressionClassChar ::= RegularExpressionNonTerminator - ("]" | "\") | RegularExpressionBackslashSequence
+
+RegularExpressionFlags ::= RegularExpressionFlag+
+
+RegularExpressionFlag ::= UnicodeIDContinue
+
+Template ::= NoSubstitutionTemplate | SubstitutionTemplate
+
+NoSubstitutionTemplate ::= "`" TemplateCharacters? "`"
+
+SubstitutionTemplate ::= TemplateHead Expression TemplateSpans
+
+TemplateSpans ::= TemplateTail | TemplateMiddleList TemplateTail
+
+TemplateMiddleList ::= TemplateMiddle Expression | TemplateMiddleList TemplateMiddle Expression
+
+TemplateHead ::= "`" TemplateCharacters? "${"
+
+TemplateMiddle ::= "}" TemplateCharacters? "${"
+
+TemplateTail ::= "}" TemplateCharacters? "`"
+
+TemplateCharacters ::= TemplateCharacter+
+
+TemplateCharacter ::= SourceCharacter - ("`" | "\" | "$" | LineTerminator) | "$" | "\" EscapeSequence | "\" NotEscapeSequence | LineContinuation | LineTerminatorSequence
+
+NotEscapeSequence ::= "0" DecimalDigit | DecimalDigit - "0" | "x" | "x" HexDigit | "u"
+
+IdentifierName ::= IdentifierStart | IdentifierName IdentifierPart
+
+IdentifierStart ::= UnicodeIDStart | "$" | "_" | "\" UnicodeEscapeSequence
+
+IdentifierPart ::= UnicodeIDContinue | "$" | "_" | "\" UnicodeEscapeSequence | ZWNJ | ZWJ
+
+UnicodeIDStart ::= (* Any Unicode code point with the Unicode property "ID_Start" *)
+
+UnicodeIDContinue ::= (* Any Unicode code point with the Unicode property "ID_Continue" *)
+
+ZWNJ ::= #x200C
+
+ZWJ ::= #x200D
+
+ReservedWord ::= Keyword | FutureReservedWord | NullLiteral | BooleanLiteral
+
+Keyword ::= "await" | "break" | "case" | "catch" | "class" | "const" | "continue" | "debugger" | "default" | "delete" | "do" | "else" | "enum" | "export" | "extends" | "false" | "finally" | "for" | "function" | "if" | "import" | "in" | "instanceof" | "new" | "null" | "return" | "super" | "switch" | "this" | "throw" | "true" | "try" | "typeof" | "var" | "void" | "while" | "with" | "yield"
+
+FutureReservedWord ::= "enum" | "implements" | "interface" | "let" | "package" | "private" | "protected" | "public" | "static"
+
+(* === SYNTACTIC GRAMMAR === *)
+
+Literal ::= NullLiteral | BooleanLiteral | NumericLiteral | StringLiteral | RegularExpressionLiteral | TemplateLiteral
+
+PrimaryExpression ::= "this" | IdentifierReference | Literal | ArrayLiteral | ObjectLiteral | FunctionExpression | ClassExpression | GeneratorExpression | AsyncFunctionExpression | AsyncGeneratorExpression | RegularExpressionLiteral | TemplateLiteral | CoverParenthesizedExpressionAndArrowParameterList
+
+CoverParenthesizedExpressionAndArrowParameterList ::= "(" Expression? ")" | "(" Expression "," AssignmentExpression ")" | "(" "..." BindingIdentifier ")"
+
+IdentifierReference ::= Identifier | "yield" | "await"
+
+BindingIdentifier ::= Identifier | "yield" | "await"
+
+LabelIdentifier ::= Identifier | "yield" | "await"
+
+Identifier ::= IdentifierName - ReservedWord
+
+ArrayLiteral ::= "[" Elision? "]" | "[" ElementList "]" | "[" ElementList "," Elision? "]"
+
+ElementList ::= Elision? AssignmentExpression | Elision? SpreadElement | ElementList "," Elision? AssignmentExpression | ElementList "," Elision? SpreadElement
+
+Elision ::= "," | Elision ","
+
+SpreadElement ::= "..." AssignmentExpression
+
+ObjectLiteral ::= "{" "}" | "{" PropertyDefinitionList "}" | "{" PropertyDefinitionList "," "}"
+
+PropertyDefinitionList ::= PropertyDefinition | PropertyDefinitionList "," PropertyDefinition
+
+PropertyDefinition ::= IdentifierReference | CoverInitializedName | PropertyName ":" AssignmentExpression | MethodDefinition | "..." AssignmentExpression
+
+PropertyName ::= LiteralPropertyName | ComputedPropertyName
+
+LiteralPropertyName ::= IdentifierName | StringLiteral | NumericLiteral
+
+ComputedPropertyName ::= "[" AssignmentExpression "]"
+
+CoverInitializedName ::= IdentifierReference Initializer
+
+Initializer ::= "=" AssignmentExpression
+
+TemplateLiteral ::= NoSubstitutionTemplate | SubstitutionTemplate
+
+TemplateSpans ::= TemplateTail | TemplateMiddleList TemplateTail
+
+TemplateMiddleList ::= TemplateMiddle Expression | TemplateMiddleList TemplateMiddle Expression
+
+MemberExpression ::= PrimaryExpression | MemberExpression "[" Expression "]" | MemberExpression "." IdentifierName | MemberExpression TemplateLiteral | SuperProperty | MetaProperty | "new" MemberExpression Arguments
+
+SuperProperty ::= "super" "[" Expression "]" | "super" "." IdentifierName
+
+MetaProperty ::= NewTarget | ImportMeta
+
+NewTarget ::= "new" "." "target"
+
+ImportMeta ::= "import" "." "meta"
+
+NewExpression ::= MemberExpression | "new" NewExpression
+
+CallExpression ::= CoverCallExpressionAndAsyncArrowHead | SuperCall | ImportCall | CallExpression Arguments | CallExpression "[" Expression "]" | CallExpression "." IdentifierName | CallExpression TemplateLiteral | CallExpression "." PrivateIdentifier
+
+SuperCall ::= "super" Arguments
+
+ImportCall ::= "import" "(" AssignmentExpression ")"
+
+Arguments ::= "(" ")" | "(" ArgumentList ")" | "(" ArgumentList "," ")"
+
+ArgumentList ::= AssignmentExpression | "..." AssignmentExpression | ArgumentList "," AssignmentExpression | ArgumentList "," "..." AssignmentExpression
+
+OptionalExpression ::= MemberExpression OptionalChain | CallExpression OptionalChain | OptionalExpression OptionalChain
+
+OptionalChain ::= "?." Arguments | "?." "[" Expression "]" | "?." IdentifierName | OptionalChain Arguments | OptionalChain "[" Expression "]" | OptionalChain "." IdentifierName
+
+LeftHandSideExpression ::= NewExpression | CallExpression | OptionalExpression
+
+UpdateExpression ::= LeftHandSideExpression | LeftHandSideExpression "++" | LeftHandSideExpression "--" | "++" UnaryExpression | "--" UnaryExpression
+
+UnaryExpression ::= UpdateExpression | "delete" UnaryExpression | "void" UnaryExpression | "typeof" UnaryExpression | "+" UnaryExpression | "-" UnaryExpression | "~" UnaryExpression | "!" UnaryExpression | AwaitExpression
+
+ExponentiationExpression ::= UnaryExpression | UpdateExpression "**" ExponentiationExpression
+
+MultiplicativeExpression ::= ExponentiationExpression | MultiplicativeExpression MultiplicativeOperator ExponentiationExpression
+
+MultiplicativeOperator ::= "*" | "/" | "%"
+
+AdditiveExpression ::= MultiplicativeExpression | AdditiveExpression "+" MultiplicativeExpression | AdditiveExpression "-" MultiplicativeExpression
+
+ShiftExpression ::= AdditiveExpression | ShiftExpression "<<" AdditiveExpression | ShiftExpression ">>" AdditiveExpression | ShiftExpression ">>>" AdditiveExpression
+
+RelationalExpression ::= ShiftExpression | RelationalExpression "<" ShiftExpression | RelationalExpression ">" ShiftExpression | RelationalExpression "<=" ShiftExpression | RelationalExpression ">=" ShiftExpression | RelationalExpression "instanceof" ShiftExpression | RelationalExpression "in" ShiftExpression | PrivateIdentifier "in" ShiftExpression
+
+EqualityExpression ::= RelationalExpression | EqualityExpression "==" RelationalExpression | EqualityExpression "!=" RelationalExpression | EqualityExpression "===" RelationalExpression | EqualityExpression "!==" RelationalExpression
+
+BitwiseANDExpression ::= EqualityExpression | BitwiseANDExpression "&" EqualityExpression
+
+BitwiseXORExpression ::= BitwiseANDExpression | BitwiseXORExpression "^" BitwiseANDExpression
+
+BitwiseORExpression ::= BitwiseXORExpression | BitwiseORExpression "|" BitwiseXORExpression
+
+LogicalANDExpression ::= BitwiseORExpression | LogicalANDExpression "&&" BitwiseORExpression
+
+LogicalORExpression ::= LogicalANDExpression | LogicalORExpression "||" LogicalANDExpression
+
+CoalesceExpression ::= CoalesceExpressionHead "??" BitwiseORExpression
+
+CoalesceExpressionHead ::= CoalesceExpression | BitwiseORExpression
+
+ShortCircuitExpression ::= LogicalORExpression | CoalesceExpression
+
+ConditionalExpression ::= ShortCircuitExpression | ShortCircuitExpression "?" AssignmentExpression ":" AssignmentExpression
+
+AssignmentExpression ::= ConditionalExpression | ArrowFunction | AsyncArrowFunction | LeftHandSideExpression "=" AssignmentExpression | LeftHandSideExpression AssignmentOperator AssignmentExpression | LeftHandSideExpression "&&=" AssignmentExpression | LeftHandSideExpression "||=" AssignmentExpression | LeftHandSideExpression "??=" AssignmentExpression
+
+AssignmentOperator ::= "*=" | "/=" | "%=" | "+=" | "-=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|=" | "**="
+
+AssignmentPattern ::= ObjectAssignmentPattern | ArrayAssignmentPattern
+
+ObjectAssignmentPattern ::= "{" "}" | "{" AssignmentRestProperty "}" | "{" AssignmentPropertyList "}" | "{" AssignmentPropertyList "," AssignmentRestProperty? "}"
+
+ArrayAssignmentPattern ::= "[" Elision? AssignmentRestElement? "]" | "[" AssignmentElementList "]" | "[" AssignmentElementList "," Elision? AssignmentRestElement? "]"
+
+AssignmentRestProperty ::= "..." DestructuringAssignmentTarget
+
+AssignmentPropertyList ::= AssignmentProperty | AssignmentPropertyList "," AssignmentProperty
+
+AssignmentElementList ::= AssignmentElisionElement | AssignmentElementList "," AssignmentElisionElement
+
+AssignmentElisionElement ::= Elision? AssignmentElement
+
+AssignmentProperty ::= IdentifierReference Initializer? | PropertyName ":" AssignmentElement
+
+AssignmentElement ::= DestructuringAssignmentTarget Initializer?
+
+AssignmentRestElement ::= "..." DestructuringAssignmentTarget
+
+DestructuringAssignmentTarget ::= LeftHandSideExpression
+
+Expression ::= AssignmentExpression | Expression "," AssignmentExpression
+
+Statement ::= BlockStatement | VariableStatement | EmptyStatement | ExpressionStatement | IfStatement | BreakableStatement | ContinueStatement | BreakStatement | ReturnStatement | WithStatement | LabelledStatement | ThrowStatement | TryStatement | DebuggerStatement
+
+Declaration ::= HoistableDeclaration | ClassDeclaration | LexicalDeclaration
+
+HoistableDeclaration ::= FunctionDeclaration | GeneratorDeclaration | AsyncFunctionDeclaration | AsyncGeneratorDeclaration
+
+BreakableStatement ::= IterationStatement | SwitchStatement
+
+BlockStatement ::= Block
+
+Block ::= "{" StatementList? "}"
+
+StatementList ::= StatementListItem | StatementList StatementListItem
+
+StatementListItem ::= Statement | Declaration
+
+LexicalDeclaration ::= LetOrConst BindingList ";"
+
+LetOrConst ::= "let" | "const"
+
+BindingList ::= LexicalBinding | BindingList "," LexicalBinding
+
+LexicalBinding ::= BindingIdentifier Initializer? | BindingPattern Initializer
+
+VariableStatement ::= "var" VariableDeclarationList ";"
+
+VariableDeclarationList ::= VariableDeclaration | VariableDeclarationList "," VariableDeclaration
+
+VariableDeclaration ::= BindingIdentifier Initializer? | BindingPattern Initializer
+
+BindingPattern ::= ObjectBindingPattern | ArrayBindingPattern
+
+ObjectBindingPattern ::= "{" "}" | "{" BindingRestProperty "}" | "{" BindingPropertyList "}" | "{" BindingPropertyList "," BindingRestProperty? "}"
+
+ArrayBindingPattern ::= "[" Elision? BindingRestElement? "]" | "[" BindingElementList "]" | "[" BindingElementList "," Elision? BindingRestElement? "]"
+
+BindingRestProperty ::= "..." BindingIdentifier
+
+BindingPropertyList ::= BindingProperty | BindingPropertyList "," BindingProperty
+
+BindingElementList ::= BindingElisionElement | BindingElementList "," BindingElisionElement
+
+BindingElisionElement ::= Elision? BindingElement
+
+BindingProperty ::= SingleNameBinding | PropertyName ":" BindingElement
+
+BindingElement ::= SingleNameBinding | BindingPattern Initializer?
+
+SingleNameBinding ::= BindingIdentifier Initializer?
+
+BindingRestElement ::= "..." BindingIdentifier | "..." BindingPattern
+
+EmptyStatement ::= ";"
+
+ExpressionStatement ::= Expression ";"
+
+IfStatement ::= "if" "(" Expression ")" Statement "else" Statement | "if" "(" Expression ")" Statement
+
+IterationStatement ::= DoWhileStatement | WhileStatement | ForStatement | ForInOfStatement
+
+DoWhileStatement ::= "do" Statement "while" "(" Expression ")" ";"
+
+WhileStatement ::= "while" "(" Expression ")" Statement
+
+ForStatement ::= "for" "(" Expression? ";" Expression? ";" Expression? ")" Statement | "for" "(" "var" VariableDeclarationList ";" Expression? ";" Expression? ")" Statement | "for" "(" LexicalDeclaration Expression? ";" Expression? ")" Statement
+
+ForInOfStatement ::= "for" "(" LeftHandSideExpression "in" Expression ")" Statement | "for" "(" "var" ForBinding "in" Expression ")" Statement | "for" "(" ForDeclaration "in" Expression ")" Statement | "for" "(" LeftHandSideExpression "of" AssignmentExpression ")" Statement | "for" "(" "var" ForBinding "of" AssignmentExpression ")" Statement | "for" "(" ForDeclaration "of" AssignmentExpression ")" Statement | "for" "await" "(" LeftHandSideExpression "of" AssignmentExpression ")" Statement | "for" "await" "(" "var" ForBinding "of" AssignmentExpression ")" Statement | "for" "await" "(" ForDeclaration "of" AssignmentExpression ")" Statement
+
+ForDeclaration ::= LetOrConst ForBinding
+
+ForBinding ::= BindingIdentifier | BindingPattern
+
+ContinueStatement ::= "continue" ";" | "continue" LabelIdentifier ";"
+
+BreakStatement ::= "break" ";" | "break" LabelIdentifier ";"
+
+ReturnStatement ::= "return" ";" | "return" Expression ";"
+
+WithStatement ::= "with" "(" Expression ")" Statement
+
+SwitchStatement ::= "switch" "(" Expression ")" CaseBlock
+
+CaseBlock ::= "{" CaseClauses? "}" | "{" CaseClauses? DefaultClause CaseClauses? "}"
+
+CaseClauses ::= CaseClause | CaseClauses CaseClause
+
+CaseClause ::= "case" Expression ":" StatementList?
+
+DefaultClause ::= "default" ":" StatementList?
+
+LabelledStatement ::= LabelIdentifier ":" LabelledItem
+
+LabelledItem ::= Statement | FunctionDeclaration
+
+ThrowStatement ::= "throw" Expression ";"
+
+TryStatement ::= "try" Block Catch | "try" Block Finally | "try" Block Catch Finally
+
+Catch ::= "catch" "(" CatchParameter ")" Block | "catch" Block
+
+Finally ::= "finally" Block
+
+CatchParameter ::= BindingIdentifier | BindingPattern
+
+DebuggerStatement ::= "debugger" ";"
+
+FunctionDeclaration ::= "function" BindingIdentifier "(" FormalParameters ")" "{" FunctionBody "}"
+
+FunctionExpression ::= "function" BindingIdentifier? "(" FormalParameters ")" "{" FunctionBody "}"
+
+UniqueFormalParameters ::= FormalParameters
+
+FormalParameters ::= | FormalParameterList
+
+FormalParameterList ::= FormalParameter | FormalParameterList "," FormalParameter
+
+FormalParameter ::= BindingElement
+
+FunctionBody ::= FunctionStatementList
+
+FunctionStatementList ::= StatementList?
+
+ArrowFunction ::= ArrowParameters "=>" ConciseBody
+
+ArrowParameters ::= BindingIdentifier | CoverParenthesizedExpressionAndArrowParameterList
+
+ConciseBody ::= AssignmentExpression | "{" FunctionBody "}"
+
+AsyncArrowFunction ::= "async" AsyncArrowBindingIdentifier "=>" AsyncConciseBody | CoverCallExpressionAndAsyncArrowHead "=>" AsyncConciseBody
+
+AsyncConciseBody ::= AssignmentExpression | AsyncFunctionBody
+
+AsyncArrowBindingIdentifier ::= BindingIdentifier
+
+CoverCallExpressionAndAsyncArrowHead ::= MemberExpression Arguments
+
+AsyncFunctionDeclaration ::= "async" "function" BindingIdentifier "(" FormalParameters ")" "{" AsyncFunctionBody "}"
+
+AsyncFunctionExpression ::= "async" "function" BindingIdentifier? "(" FormalParameters ")" "{" AsyncFunctionBody "}"
+
+AsyncFunctionBody ::= FunctionBody
+
+AwaitExpression ::= "await" UnaryExpression
+
+GeneratorDeclaration ::= "function" "*" BindingIdentifier "(" FormalParameters ")" "{" GeneratorBody "}"
+
+GeneratorExpression ::= "function" "*" BindingIdentifier? "(" FormalParameters ")" "{" GeneratorBody "}"
+
+GeneratorBody ::= FunctionBody
+
+YieldExpression ::= "yield" | "yield" AssignmentExpression | "yield" "*" AssignmentExpression
+
+AsyncGeneratorDeclaration ::= "async" "function" "*" BindingIdentifier "(" FormalParameters ")" "{" AsyncGeneratorBody "}"
+
+AsyncGeneratorExpression ::= "async" "function" "*" BindingIdentifier? "(" FormalParameters ")" "{" AsyncGeneratorBody "}"
+
+AsyncGeneratorBody ::= FunctionBody
+
+ClassDeclaration ::= "class" BindingIdentifier ClassTail | "class" ClassTail
+
+ClassExpression ::= "class" BindingIdentifier? ClassTail
+
+ClassTail ::= ClassHeritage? "{" ClassBody "}"
+
+ClassHeritage ::= "extends" LeftHandSideExpression
+
+ClassBody ::= ClassElementList?
+
+ClassElementList ::= ClassElement | ClassElementList ClassElement
+
+ClassElement ::= MethodDefinition | StaticBlock | ";"
+
+StaticBlock ::= "static" "{" ClassStaticBlockBody "}"
+
+ClassStaticBlockBody ::= ClassStaticBlockStatementList
+
+ClassStaticBlockStatementList ::= StatementList?
+
+MethodDefinition ::= ClassElementName "(" UniqueFormalParameters ")" "{" FunctionBody "}" | GeneratorMethod | AsyncMethod | AsyncGeneratorMethod | "get" ClassElementName "(" ")" "{" FunctionBody "}" | "set" ClassElementName "(" PropertySetParameterList ")" "{" FunctionBody "}"
+
+GeneratorMethod ::= "*" ClassElementName "(" UniqueFormalParameters ")" "{" GeneratorBody "}"
+
+AsyncMethod ::= "async" ClassElementName "(" UniqueFormalParameters ")" "{" AsyncFunctionBody "}"
+
+AsyncGeneratorMethod ::= "async" "*" ClassElementName "(" UniqueFormalParameters ")" "{" AsyncGeneratorBody "}"
+
+ClassElementName ::= PropertyName | PrivateIdentifier
+
+PrivateIdentifier ::= "#" IdentifierName
+
+PropertySetParameterList ::= FormalParameter
+
+Module ::= ModuleBody?
+
+ModuleBody ::= ModuleItemList
+
+ModuleItemList ::= ModuleItem | ModuleItemList ModuleItem
+
+ModuleItem ::= ImportDeclaration | ExportDeclaration | StatementListItem
+
+ImportDeclaration ::= "import" ImportClause FromClause ";" | "import" ModuleSpecifier ";"
+
+ImportClause ::= ImportedDefaultBinding | NameSpaceImport | NamedImports | ImportedDefaultBinding "," NameSpaceImport | ImportedDefaultBinding "," NamedImports
+
+ImportedDefaultBinding ::= ImportedBinding
+
+NameSpaceImport ::= "*" "as" ImportedBinding
+
+NamedImports ::= "{" "}" | "{" ImportsList "}" | "{" ImportsList "," "}"
+
+FromClause ::= "from" ModuleSpecifier
+
+ImportsList ::= ImportSpecifier | ImportsList "," ImportSpecifier
+
+ImportSpecifier ::= ImportedBinding | ModuleExportName "as" ImportedBinding
+
+ModuleExportName ::= IdentifierName | StringLiteral
+
+ImportedBinding ::= BindingIdentifier
+
+ExportDeclaration ::= "export" "*" FromClause ";" | "export" "*" "as" ModuleExportName FromClause ";" | "export" NamedExports FromClause ";" | "export" NamedExports ";" | "export" VariableStatement | "export" Declaration | "export" "default" HoistableDeclaration | "export" "default" ClassDeclaration | "export" "default" AssignmentExpression ";"
+
+NamedExports ::= "{" "}" | "{" ExportsList "}" | "{" ExportsList "," "}"
+
+ExportsList ::= ExportSpecifier | ExportsList "," ExportSpecifier
+
+ExportSpecifier ::= ModuleExportName | ModuleExportName "as" ModuleExportName
+
+ModuleSpecifier ::= StringLiteral
+
+Script ::= ScriptBody?
+
+ScriptBody ::= StatementList
