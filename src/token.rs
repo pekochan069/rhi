@@ -144,7 +144,7 @@
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
-// Source: https://github.com/microsoft/typescript-go/blob/main/internal%2Fast%2Fkind.go
+// Source: https://github.com/microsoft/typescript-go/blob/main/internal/ast/kind.go
 // (Note: This code has been modified for this project.)
 // =================================================================
 #[allow(dead_code)]
