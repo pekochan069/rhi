@@ -170,161 +170,161 @@ pub enum TokenType {
     TemplateMiddle,
     TemplateTail,
     // Punctuation
-    LeftBraceToken,
-    RightBraceToken,
-    LeftParenToken,
-    RightParenToken,
-    LeftBracketToken,
-    RightBracketToken,
-    DotToken,
-    DotDotDotToken,
-    SemicolonToken,
-    CommaToken,
-    QuestionDotToken,
-    LessThanToken,
-    LessThanSlashToken,
-    GreaterThanToken,
-    LessThanEqualsToken,
-    GreaterThanEqualsToken,
-    EqualsEqualsToken,
-    ExclamationEqualsToken,
-    EqualsEqualsEqualsToken,
-    ExclamationEqualsEqualsToken,
-    EqualsGreaterThanToken,
-    PlusToken,
-    MinusToken,
-    AsteriskToken,
-    AsteriskAsteriskToken,
-    SlashToken,
-    PercentToken,
-    PlusPlusToken,
-    MinusMinusToken,
-    LessThanLessThanToken,
-    GreaterThanGreaterThanToken,
-    GreaterThanGreaterThanGreaterThanToken,
-    AmpersandToken,
-    BarToken,
-    CaretToken,
-    ExclamationToken,
-    TildeToken,
-    AmpersandAmpersandToken,
-    BarBarToken,
-    QuestionToken,
-    ColonToken,
-    AtToken,
-    QuestionQuestionToken,
+    LeftBraceToken,                         // {
+    RightBraceToken,                        // }
+    LeftParenToken,                         // (
+    RightParenToken,                        // )
+    LeftBracketToken,                       // [
+    RightBracketToken,                      // ]
+    DotToken,                               // .
+    DotDotDotToken,                         // ...
+    SemicolonToken,                         // ;
+    CommaToken,                             // ,
+    QuestionDotToken,                       // ?.
+    LessThanToken,                          // <
+    LessThanSlashToken,                     // </
+    GreaterThanToken,                       // >
+    LessThanEqualsToken,                    // <=
+    GreaterThanEqualsToken,                 // >=
+    EqualsEqualsToken,                      // ==
+    ExclamationEqualsToken,                 // !=
+    EqualsEqualsEqualsToken,                // ===
+    ExclamationEqualsEqualsToken,           // !==
+    EqualsGreaterThanToken,                 // =>
+    PlusToken,                              // +
+    MinusToken,                             // -
+    AsteriskToken,                          // *
+    AsteriskAsteriskToken,                  // **
+    SlashToken,                             // /
+    PercentToken,                           // %
+    PlusPlusToken,                          // ++
+    MinusMinusToken,                        // --
+    LessThanLessThanToken,                  // <<
+    GreaterThanGreaterThanToken,            // >>
+    GreaterThanGreaterThanGreaterThanToken, // >>>
+    AmpersandToken,                         // &
+    BarToken,                               // |
+    CaretToken,                             // ^
+    ExclamationToken,                       // !
+    TildeToken,                             // ~
+    AmpersandAmpersandToken,                // &&
+    BarBarToken,                            // ||
+    QuestionToken,                          // ?
+    ColonToken,                             // :
+    AtToken,                                // @
+    QuestionQuestionToken,                  // ??
     /** Only the JSDoc scanner produces BacktickToken. The normal scanner produces NoSubstitutionTemplateLiteral and related kinds. */
-    BacktickToken,
+    BacktickToken, // `
     /** Only the JSDoc scanner produces HashToken. The normal scanner produces PrivateIdentifier. */
-    HashToken,
+    HashToken, // #
     // Assignments
-    EqualsToken,
-    PlusEqualsToken,
-    MinusEqualsToken,
-    AsteriskEqualsToken,
-    AsteriskAsteriskEqualsToken,
-    SlashEqualsToken,
-    PercentEqualsToken,
-    LessThanLessThanEqualsToken,
-    GreaterThanGreaterThanEqualsToken,
-    GreaterThanGreaterThanGreaterThanEqualsToken,
-    AmpersandEqualsToken,
-    BarEqualsToken,
-    BarBarEqualsToken,
-    AmpersandAmpersandEqualsToken,
-    QuestionQuestionEqualsToken,
-    CaretEqualsToken,
+    EqualsToken,                                  // =
+    PlusEqualsToken,                              // +=
+    MinusEqualsToken,                             // -=
+    AsteriskEqualsToken,                          // *=
+    AsteriskAsteriskEqualsToken,                  // **=
+    SlashEqualsToken,                             // /=
+    PercentEqualsToken,                           // %=
+    LessThanLessThanEqualsToken,                  // <<=
+    GreaterThanGreaterThanEqualsToken,            // >>=
+    GreaterThanGreaterThanGreaterThanEqualsToken, // >>>=
+    AmpersandEqualsToken,                         // &=
+    AmpersandAmpersandEqualsToken,                // &&=
+    BarEqualsToken,                               // |=
+    BarBarEqualsToken,                            // ||=
+    QuestionQuestionEqualsToken,                  // ??=
+    CaretEqualsToken,                             // ^=
     // Identifiers and PrivateIdentifier
     Identifier,
     PrivateIdentifier,
     JSDocCommentTextToken,
     // Reserved words
-    BreakKeyword,
-    CaseKeyword,
-    CatchKeyword,
-    ClassKeyword,
-    ConstKeyword,
-    ContinueKeyword,
-    DebuggerKeyword,
-    DefaultKeyword,
-    DeleteKeyword,
-    DoKeyword,
-    ElseKeyword,
-    EnumKeyword,
-    ExportKeyword,
-    ExtendsKeyword,
-    FalseKeyword,
-    FinallyKeyword,
-    ForKeyword,
-    FunctionKeyword,
-    IfKeyword,
-    ImportKeyword,
-    InKeyword,
-    InstanceOfKeyword,
-    NewKeyword,
-    NullKeyword,
-    ReturnKeyword,
-    SuperKeyword,
-    SwitchKeyword,
-    ThisKeyword,
-    ThrowKeyword,
-    TrueKeyword,
-    TryKeyword,
-    TypeOfKeyword,
-    VarKeyword,
-    VoidKeyword,
-    WhileKeyword,
-    WithKeyword,
+    BreakKeyword,      // break
+    CaseKeyword,       // case
+    CatchKeyword,      // catch
+    ClassKeyword,      // class
+    ConstKeyword,      // const
+    ContinueKeyword,   // continue
+    DebuggerKeyword,   // debugger
+    DefaultKeyword,    // default
+    DeleteKeyword,     // delete
+    DoKeyword,         // do
+    ElseKeyword,       // else
+    EnumKeyword,       // enum
+    ExportKeyword,     // export
+    ExtendsKeyword,    // extends
+    FalseKeyword,      // false
+    FinallyKeyword,    // finally
+    ForKeyword,        // for
+    FunctionKeyword,   // function
+    IfKeyword,         // if
+    ImportKeyword,     // import
+    InKeyword,         // in
+    InstanceOfKeyword, //instance
+    NewKeyword,        //new
+    NullKeyword,       //null
+    ReturnKeyword,     //return
+    SuperKeyword,      //super
+    SwitchKeyword,     //switch
+    ThisKeyword,       //this
+    ThrowKeyword,      //throw
+    TrueKeyword,       //true
+    TryKeyword,        //try
+    TypeOfKeyword,     //typeof
+    VarKeyword,        //var
+    VoidKeyword,       //void
+    WhileKeyword,      //while
+    WithKeyword,       //with
     // Strict mode reserved words
-    ImplementsKeyword,
-    InterfaceKeyword,
-    LetKeyword,
-    PackageKeyword,
-    PrivateKeyword,
-    ProtectedKeyword,
-    PublicKeyword,
-    StaticKeyword,
-    YieldKeyword,
+    ImplementsKeyword, //implements
+    InterfaceKeyword,  //interface
+    LetKeyword,        //let
+    PackageKeyword,    //package
+    PrivateKeyword,    //private
+    ProtectedKeyword,  //protected
+    PublicKeyword,     //public
+    StaticKeyword,     //static
+    YieldKeyword,      //yield
     // Contextual keywords
-    AbstractKeyword,
-    AccessorKeyword,
-    AsKeyword,
-    AssertsKeyword,
-    AssertKeyword,
-    AnyKeyword,
-    AsyncKeyword,
-    AwaitKeyword,
-    BooleanKeyword,
-    ConstructorKeyword,
-    DeclareKeyword,
-    GetKeyword,
-    ImmediateKeyword,
-    InferKeyword,
-    IntrinsicKeyword,
-    IsKeyword,
-    KeyOfKeyword,
-    ModuleKeyword,
-    NamespaceKeyword,
-    NeverKeyword,
-    OutKeyword,
-    ReadonlyKeyword,
-    RequireKeyword,
-    NumberKeyword,
-    ObjectKeyword,
-    SatisfiesKeyword,
-    SetKeyword,
-    StringKeyword,
-    SymbolKeyword,
-    TypeKeyword,
-    UndefinedKeyword,
-    UniqueKeyword,
-    UnknownKeyword,
-    UsingKeyword,
-    FromKeyword,
-    GlobalKeyword,
-    BigIntKeyword,
-    OverrideKeyword,
-    OfKeyword, // LastKeyword and LastToken and LastContextualKeyword
+    AbstractKeyword,    //abstract
+    AccessorKeyword,    //accessor
+    AsKeyword,          //as
+    AssertsKeyword,     //asserts
+    AssertKeyword,      //assert
+    AnyKeyword,         //any
+    AsyncKeyword,       //async
+    AwaitKeyword,       //await
+    BooleanKeyword,     //Boolean
+    ConstructorKeyword, //constructor
+    DeclareKeyword,     //declare
+    GetKeyword,         //get
+    ImmediateKeyword,   //immediate
+    InferKeyword,       //infer
+    IntrinsicKeyword,   //intrinsic
+    IsKeyword,          //is
+    KeyOfKeyword,       //keyof
+    ModuleKeyword,      //module
+    NamespaceKeyword,   //namespace
+    NeverKeyword,       //never
+    OutKeyword,         //out
+    ReadonlyKeyword,    //readonly
+    RequireKeyword,     //require
+    NumberKeyword,      //number
+    ObjectKeyword,      //object
+    SatisfiesKeyword,   //satisfies
+    SetKeyword,         //set
+    StringKeyword,      // String
+    SymbolKeyword,      //symbol
+    TypeKeyword,        //type
+    UndefinedKeyword,   //undefined
+    UniqueKeyword,      //unique
+    UnknownKeyword,     //unknown
+    UsingKeyword,       //using
+    FromKeyword,        //from
+    GlobalKeyword,      //global
+    BigIntKeyword,      //BigInt
+    OverrideKeyword,    //override
+    OfKeyword,          // of, LastKeyword and LastToken and LastContextualKeyword
     // Parse tree nodes
     // Names
     QualifiedName,

@@ -1,3 +1,5 @@
+use std::str::Chars;
+
 use crate::token::TokenType;
 
 // DotToken, .
@@ -49,11 +51,17 @@ use crate::token::TokenType;
 // CaretToken, ^
 // CaretEqualsToken, ^=
 
+fn skip_whitespaces<'a>(source: &'a Chars, start: usize) -> &'a Chars {
+    let current = 
+}
+
 pub fn lex(source: &str) -> Vec<TokenType> {
     let mut vec: Vec<TokenType> = vec![];
     let line: usize = 0;
+    let current: usize = 0;
+    let chars = source.chars();
 
-    for (index, c) in source.chars().enumerate() {
+    for (index, c) in chars.enumerate() {
         match c {
             ';' => vec.push(TokenType::SemicolonToken),
             '(' => vec.push(TokenType::LeftParenToken),
@@ -66,6 +74,7 @@ pub fn lex(source: &str) -> Vec<TokenType> {
             '~' => vec.push(TokenType::TildeToken),
             ':' => vec.push(TokenType::ColonToken),
             '@' => vec.push(TokenType::AtToken),
+            '.' => {}
             _ => vec.push(TokenType::Unknown),
         }
     }
