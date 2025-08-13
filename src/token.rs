@@ -581,7 +581,7 @@ pub struct Token<'a> {
 }
 
 impl<'a> Token<'a> {
-    fn new(
+    pub fn new(
         token_type: TokenType,
         line: usize,
         loc: usize,

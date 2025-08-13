@@ -1,3 +1,7 @@
+#![feature(coroutines)]
+#![feature(coroutine_trait)]
+#![feature(stmt_expr_attributes)]
+
 mod lexer;
 mod token;
 
