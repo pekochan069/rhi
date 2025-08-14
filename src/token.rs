@@ -133,6 +133,8 @@
 //     Unique,
 // }
 
+use std::fmt;
+
 // =================================================================
 // This snippet is from the 'microsoft/typescript-go' project.
 //
@@ -148,7 +150,7 @@
 // (Note: This code has been modified for this project.)
 // =================================================================
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TokenType {
     Unknown,
     EndOfFile,
@@ -572,28 +574,48 @@ pub enum TokenType {
     LastTriviaToken,         // = ConflictMarkerTrivia
 }
 
-pub struct Token<'a> {
-    token_type: TokenType,
-    line: usize,
-    loc: usize,
-    lexeme: &'a str,
-    literal_value: &'a str,
+#[derive(Debug)]
+pub struct StrSpan {
+    pub start: usize,
+    pub end: usize,
 }
 
-impl<'a> Token<'a> {
+#[derive(Debug)]
+pub struct Token {
+    pub token_type: TokenType,
+    pub line: usize,
+    pub loc: usize,
+    pub end: usize,
+    pub lexeme: Option<StrSpan>,
+    pub literal_value: Option<StrSpan>,
+}
+
+impl Token {
     pub fn new(
         token_type: TokenType,
         line: usize,
         loc: usize,
-        lexeme: &'a str,
-        literal_value: &'a str,
+        end: usize,
+        lexeme: Option<StrSpan>,
+        literal_value: Option<StrSpan>,
     ) -> Self {
         Self {
             token_type,
             line,
             loc,
+            end,
             lexeme,
             literal_value,
         }
+    }
+}
+
+impl fmt::Display for Token {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "[{}:{}-{}] Type: {:?}, lexeme: {:?}, literal value: {:?}",
+            self.line, self.loc, self.end, self.token_type, self.lexeme, self.literal_value
+        )
     }
 }
